@@ -5,12 +5,12 @@ let player, controls, center;
 class GameScene extends Phaser.Scene {
   constructor() {
     super({
-      key: "gamescene",
+      key: "GameScene",
     });
   }
 
   preload() {
-    this.load.image("thanos", "/img/thanospic.png");
+    this.load.image("thanos", "../img/thanospic.png");
     this.load.image("platform", "../img/platform.png");
   }
 
