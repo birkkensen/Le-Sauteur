@@ -1,39 +1,42 @@
-import Phaser from 'phaser'
+import Phaser from "phaser";
 
-export default class HelloWorldScene extends Phaser.Scene
-{
-	constructor()
-	{
-		super('hello-world')
-	}
+let player, controls, center;
+// let gamePoints = 0;
+class Gamescene extends Phaser.Scene {
+  constructor() {
+    super({
+      key: "gamescene",
+    });
+  }
 
-	preload()
-    {
-        this.load.setBaseURL('http://labs.phaser.io')
+  preload() {
+    this.load.image("thanos", "img/thanospic.png");
+    this.load.image("platform", "../img/platform.png");
+  }
 
-        this.load.image('sky', 'assets/skies/space3.png')
-        this.load.image('logo', 'assets/sprites/phaser3-logo.png')
-        this.load.image('red', 'assets/particles/red.png')
+  create() {
+    center = {
+      x: this.physics.world.bounds.width / 2,
+      y: this.physics.world.bounds.height / 2,
+    };
+
+    player = this.physics.add.sprite(center.x - 100, 0, "thanos");
+    player.setCollideWorldBounds(true);
+
+    controls = this.input.keyboard.createCursorKeys();
+
+    this.add.image(center.x, center.y, "plat");
+  }
+
+  update() {
+    if (controls.up.isDown) {
+      player.setVelocityY(-500);
+      console.log("up");
+    } else if (controls.down.isDown) {
+      player.setVelocityY(500);
+      console.log("down");
     }
-
-    create()
-    {
-        this.add.image(400, 300, 'sky')
-
-        const particles = this.add.particles('red')
-
-        const emitter = particles.createEmitter({
-            speed: 100,
-            scale: { start: 1, end: 0 },
-            blendMode: 'ADD'
-        })
-
-        const logo = this.physics.add.image(400, 100, 'logo')
-
-        logo.setVelocity(100, 200)
-        logo.setBounce(1, 1)
-        logo.setCollideWorldBounds(true)
-
-        emitter.startFollow(logo)
-    }
+  }
 }
+
+export default Gamescene;
