@@ -2,7 +2,7 @@ import Phaser from "phaser";
 
 let player, controls, center;
 // let gamePoints = 0;
-class Gamescene extends Phaser.Scene {
+class GameScene extends Phaser.Scene {
   constructor() {
     super({
       key: "gamescene",
@@ -10,7 +10,7 @@ class Gamescene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("thanos", "img/thanospic.png");
+    this.load.image("thanos", "/img/thanospic.png");
     this.load.image("platform", "../img/platform.png");
   }
 
@@ -39,4 +39,4 @@ class Gamescene extends Phaser.Scene {
   }
 }
 
-export default Gamescene;
+export default GameScene;
