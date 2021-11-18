@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-let player, controls, center;
+let player, controls, center, platform;
 // let gamePoints = 0;
 class GameScene extends Phaser.Scene {
   constructor() {
@@ -25,10 +25,14 @@ class GameScene extends Phaser.Scene {
 
     controls = this.input.keyboard.createCursorKeys();
 
-    this.add.image(center.x, center.y, "platform");
+    platform = this.physics.add.sprite(200, center.y * 2 - 100, "platform");
+    platform.setCollideWorldBounds(true);
+    platform.setImmovable(true);
+    platform.body.moves = false;
   }
 
   update() {
+    this.physics.add.collider(platform, player, landing, null, this);
     if (controls.up.isDown) {
       player.setVelocityY(-500);
       console.log("up");
@@ -40,3 +44,7 @@ class GameScene extends Phaser.Scene {
 }
 
 export default GameScene;
+function landing() {
+  player.setVelocityY(0);
+  console.log("test");
+}
