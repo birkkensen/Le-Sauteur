@@ -10,8 +10,8 @@ class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("thanos", "../img/thanospic.png");
-    this.load.image("platform", "../img/platform.png");
+    this.load.image("thanos", "./assets/thanospic.png");
+    this.load.image("platform", "./assets/platform.png");
   }
 
   create() {
@@ -25,7 +25,7 @@ class GameScene extends Phaser.Scene {
 
     controls = this.input.keyboard.createCursorKeys();
 
-    this.add.image(center.x, center.y, "plat");
+    this.add.image(center.x, center.y, "platform");
   }
 
   update() {
