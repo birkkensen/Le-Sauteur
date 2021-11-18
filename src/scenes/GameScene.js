@@ -17,7 +17,7 @@ class GameScene extends Phaser.Scene {
   preload() {
     this.load.image("thanos", "./assets/thanospic.png");
     this.load.image("platform", "./assets/platform.png");
-    this.load.spritesheet("dude", "./assets/scaledDude.png", { frameWidth: 128, frameHeight: 128 });
+    this.load.spritesheet("dude", "./assets/theDude.png", { frameWidth: 128, frameHeight: 128 });
   }
 
   create() {
@@ -38,7 +38,7 @@ class GameScene extends Phaser.Scene {
     });
     this.anims.create({
       key: "jumping",
-      frames: [{ key: "dude", frame: 0 }],
+      frames: [{ key: "dude", frame: 4 }],
     });
 
     this.input.on("pointerdown", this.jump, this);
