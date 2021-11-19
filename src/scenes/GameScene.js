@@ -1,7 +1,24 @@
 import Phaser from "phaser";
 
-let player, controls, center, platform;
+let game, player, controls, center, platform;
 // let gamePoints = 0;
+
+let gameOptions = {
+  platformSpeedRange: [300, 300], //speed range in px/sec
+  backgroundSpeed: 80, //backgroundspeed in px/sec
+  platformSpawnRange: [80, 300], //how far should the next be platform from the right edge, before next platform spawns, in px
+  platformSizeRange: [90, 300], //platform width range in px
+  platformHeightRange: [-5, 5], //height range between rightmost platform and next platform to be spawned
+  platformHeightScale: 20, //scale to be multiplied by platformHeightRange
+  playerGravity: 900,
+  jumps: 2,
+  jumpForce: 500, 
+  platformVerticalLimit: [0.4, 0.8],
+  playerStartPosition: 200, //x position
+  coinPercent: 25, // % of probability of coin appearing
+  spikePercent: 25, // % of probability of spike appearing
+};
+
 class GameScene extends Phaser.Scene {
   constructor() {
     super({
@@ -12,7 +29,7 @@ class GameScene extends Phaser.Scene {
   preload() {
     this.load.image("thanos", "./assets/thanospic.png");
     this.load.image("platform", "./assets/platform.png");
-  }
+  };
 
   create() {
     center = {
