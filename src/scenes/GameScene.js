@@ -29,6 +29,8 @@ class GameScene extends Phaser.Scene {
   preload() {
     this.load.image("thanos", "./assets/thanospic.png");
     this.load.image("platform", "./assets/platform.png");
+    this.load.image("spike", "./assets/spike.png");
+    this.load.image("coin", "./assets/coin.png");
     this.load.spritesheet("dude", "./assets/theDude.png", { frameWidth: 128, frameHeight: 128 });
   }
 
@@ -53,7 +55,7 @@ class GameScene extends Phaser.Scene {
       frames: [{ key: "dude", frame: 4 }],
     });
     // Add jump on spacebar
-    this.input.keyboard.on("keydown_UP", this.jump, this);
+    this.input.on("pointerdown", this.jump, this);
     this.playerJumps = 0;
     // Create platform and set its physics
     platform = this.physics.add.sprite(center.x, center.y * 2 - 100, "platform");
@@ -61,6 +63,88 @@ class GameScene extends Phaser.Scene {
     platform.body.moves = false;
 
     this.physics.add.collider(player, platform);
+
+
+    //group all active platforms
+    this.platformGroup = this.add.group({
+      //when a platform is removed > added to the pool 
+      removeCallback: function(platform) {
+        platform.scene.platformPool.add(platform)
+      }
+    });
+
+    //platform pool
+    this.platformPool = this.add.group({
+      //when a platform is removed from the pool > added to the active platforms group
+      removeCallback: function(platform) {
+        platform.scene.platformGroup.add(platform)
+      }
+    });
+    
+    //group all active coins
+    this.coinGroup = this.add.group({
+      //when a coin is removed > added to the pool
+      removeCallback: function(coin) {
+        coin.scene.coinPool.add(coin)
+      }
+    });
+
+    //coin pool
+    this.coinPool = this.add.group({
+      //when a coin is removed from the pool > added to the active coins group
+      removeCallback: function(coin) {
+        coin.scene.coinGroup.add(coin)
+      }
+    });
+
+
+    
+    //keeping track of added platforms
+    this.addedPlatforms = 0;
+    // adding a platform to the game, the arguments are platform width, x position and y position
+    this.addPlatforms(game.config.width, game.config.width / 2, game.config.height * gameOptions.platformVerticalLimit[1]);
+
+    this.dying = false; //player is not dying
+
+    this.physics.add.overlap(this.playerJumps, this.coinGroup, function(player, coin) {
+      this.tweens.add( {
+        target: coin,
+        callbackScope: this,
+        onComplete: function() {
+          this.coinGroup.killAndHide(coin);
+          this.coinGroup.remove(coin);
+        } 
+      });
+    }, null, this);
+
+
+    //platform added from the pool or created on the fly
+    this.addedPlatforms(platformWidth, posX, posY); {
+      this.addedPlatforms ++;
+      let platform;
+      if(this.platformPool.getLength()) {
+        platform = this.platformPool.getFirst();
+        platform.x = posX;
+        platform.y = posY;
+        platform.active = true;
+        platform.visible = true;
+        this.platformPool.remove(platform);
+        let newRatio = platformWidth / platform.displayWidth;
+        platform.displayWidth = platformWidth;
+        platform.tileScaleX = 1 /platform.scaleX;
+      }
+      else {
+        platform = this.add.tileSprite(posX, posY, platformWidth, 32, "platform");
+        this.physics.add.existing(platform);
+        platform.body.setImmovable(true);
+        platform.body.setVelocityX(Phaser.Math.Between(gameOptions.platformSpeedRange[0], gameOptions.platformSpeedRange[1]) * -1);
+        platform.setDepth(2);
+        this.platformPool.add(platform);
+      }
+      this.nextPlatformDistance = Phaser.Math.Between(gameOptions.platformSpawnRange[0], gameOptions.platformSpawnRange[1]);
+
+    }
+
   }
 
   update() {
