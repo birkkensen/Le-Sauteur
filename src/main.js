@@ -8,9 +8,9 @@ const config = {
   height: window.innerHeight,
   physics: {
     default: "arcade",
-    arcade: {
-      gravity: { y: 900 },
-    },
+    // arcade: {
+    //   gravity: { y: 900 },
+    // },
   },
   scene: [GameScene],
 };
