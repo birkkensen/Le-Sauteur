@@ -1,6 +1,8 @@
 import Phaser from "phaser";
 
+
 let game, player, controls, center, platform;
+
 // let gamePoints = 0;
 
 let gameOptions = {
@@ -20,6 +22,7 @@ let gameOptions = {
 };
 
 class GameScene extends Phaser.Scene {
+
   constructor() {
     super({
       key: "GameScene",
@@ -61,6 +64,14 @@ class GameScene extends Phaser.Scene {
     platform.body.moves = false;
 
     this.physics.add.collider(player, platform);
+            timerText = this.add.text(100, 100, "points: 0");
+        timerText.setOrigin(0.5);
+        this.time.addEvent({
+            delay: 5000,
+            callback: this.updateCounter,
+            callbackScope: this,
+            loop: true,
+        });
   }
 
   update() {
@@ -68,7 +79,10 @@ class GameScene extends Phaser.Scene {
       player.anims.play("running", true);
     }
   }
-
+    updateCounter() {
+        counter++;
+        timerText.setText("points: " + counter);
+    }
   jump() {
     if (
       player.body.touching.down ||
@@ -80,8 +94,9 @@ class GameScene extends Phaser.Scene {
       player.setVelocityY(gameOptions.jumpForce * -1);
       player.anims.play("jumping", true);
       this.playerJumps++;
+
     }
-  }
 }
 
 export default GameScene;
+
