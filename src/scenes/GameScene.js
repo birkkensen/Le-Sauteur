@@ -9,10 +9,10 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-  preload() {
-    this.load.image("thanos", "./assets/thanospic.png");
-    this.load.image("platform", "./assets/platform.png");
-  }
+  // preload() {
+  //   // this.load.image("thanos", "./assets/thanospic.png");
+  //   // this.load.image("platform", "./assets/platform.png");
+  // }
 
   create() {
     center = {
