@@ -40,8 +40,8 @@ class GameScene extends Phaser.Scene {
       key: "jumping",
       frames: [{ key: "dude", frame: 4 }],
     });
-
-    this.input.on("pointerdown", this.jump, this);
+    // Add jump on spacebar
+    this.input.keyboard.on("keydown_UP", this.jump, this);
     this.playerJumps = 0;
     // Create platform and set its physics
     platform = this.physics.add.sprite(center.x, center.y * 2 - 100, "platform");
@@ -50,11 +50,13 @@ class GameScene extends Phaser.Scene {
 
     this.physics.add.collider(player, platform);
   }
+
   update() {
     if (player.body.touching.down) {
       player.anims.play("running", true);
     }
   }
+
   jump() {
     if (
       player.body.touching.down ||
