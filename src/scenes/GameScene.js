@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 
 let game;
+let testM;
 window.onload = function () {
   const config = {
     type: Phaser.AUTO,
