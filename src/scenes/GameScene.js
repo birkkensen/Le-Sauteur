@@ -20,7 +20,7 @@ window.onload = function () {
   game = new Phaser.Game(config);
 };
 
-let game, player, controls, center, platform, timerText;
+let player, controls, platform, timerText;
 let counter = 0;
 
 // let gamePoints = 0;
