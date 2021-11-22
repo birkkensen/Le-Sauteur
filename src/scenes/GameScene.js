@@ -1,7 +1,6 @@
 import Phaser from "phaser";
-
-
-let game;
+let game, timerText;
+let counter = 0;
 window.onload = function () {
   const config = {
     type: Phaser.AUTO,
@@ -20,11 +19,7 @@ window.onload = function () {
   game = new Phaser.Game(config);
 };
 
-let player, controls, platform, timerText;
-let counter = 0;
-
 // let gamePoints = 0;
-
 
 let gameOptions = {
   platformSpeedRange: [300, 300], //speed range in px/sec
@@ -71,7 +66,6 @@ class GameScene extends Phaser.Scene {
       frames: [{ key: "dude", frame: 4 }],
     });
 
-
     // group with all active platforms.
     this.platformGroup = this.add.group({
       // once a platform is removed, it's added to the pool
@@ -97,7 +91,6 @@ class GameScene extends Phaser.Scene {
     this.input.on("pointerdown", this.jump, this);
 
     this.playerJumps = 0;
-
 
     this.dying = false;
 
@@ -132,7 +125,7 @@ class GameScene extends Phaser.Scene {
       this
     );
 
-    this.physics.add.collider(player, platform);
+    // this.physics.add.collider(player, platform);
     timerText = this.add.text(100, 100, "points: 0");
     timerText.setOrigin(0.5);
     this.time.addEvent({
@@ -141,7 +134,6 @@ class GameScene extends Phaser.Scene {
       callbackScope: this,
       loop: true,
     });
-
   }
 
   // the core of the script: platform are added from the pool or created on the fly
