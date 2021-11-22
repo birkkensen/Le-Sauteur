@@ -1,6 +1,9 @@
 import Phaser from "phaser";
-
-let game, timerText;
+let healthbar3;
+let healthbar2;
+let healthbar1;
+let healthCounter = 3;
+let game, timerText, center;
 let counter = 0;
 window.onload = function() {
     const config = {
@@ -10,7 +13,7 @@ window.onload = function() {
         physics: {
             default: "arcade",
             arcade: {
-                debug: true,
+                debug: false,
                 gravity: { y: 0 },
             },
         },
@@ -50,11 +53,25 @@ class GameScene extends Phaser.Scene {
     preload() {
         this.load.image("platform", "./assets/platform.png");
         this.load.spritesheet("dude", "./assets/thePlayer.png", { frameWidth: 96, frameHeight: 128 });
+        this.load.spritesheet("health3", "./assets/health.png", { frameWidth: 150, frameHeight: 28 })
+        this.load.spritesheet("health2", "./assets/health.png", { frameWidth: 100, frameHeight: 28 })
+        this.load.spritesheet("health1", "./assets/health.png", { frameWidth: 50, frameHeight: 28 })
     }
 
     create() {
-        // setting player animation
-        // healthbar = this.add.image(center.x * 2 - 140, 20, "health")
+
+        center = {
+            x: this.physics.world.bounds.width / 2,
+            y: this.physics.world.bounds.height / 2,
+        }
+
+        healthbar3 = this.add.image(center.x * 2 - 140, 20, "health3")
+        healthbar2 = this.add.image(center.x * 2 - 140, 20, "health2")
+        healthbar1 = this.add.image(center.x * 2 - 140, 20, "health1")
+        healthbar2.visible = false;
+        healthbar1.visible = false;
+        healthbar3.visible = false;
+
         this.anims.create({
             key: "run",
             frames: this.anims.generateFrameNumbers("dude", {
@@ -199,9 +216,42 @@ class GameScene extends Phaser.Scene {
     }
 
     update() {
+
         // if the player is falliong down, reset
         if (this.player.y > game.config.height) {
             this.scene.start("GameScene");
+
+
+            if (healthCounter == 3) {
+                healthbar3.visible = true;
+                healthbar2.visible = false;
+                healthbar1.visible = false;
+
+
+            }
+
+            if (healthCounter == 2) {
+                healthbar3.visible = false;
+                healthbar2.visible = true;
+                healthbar1.visible = false;
+
+
+            }
+            if (healthCounter == 1) {
+                healthbar3.visible = false;
+                healthbar2.visible = false;
+                healthbar1.visible = true;
+
+
+            }
+            if (healthCounter <= 0) {
+                this.scene.stop("GameScene");
+
+                console.log('finish')
+
+            }
+            healthCounter--;
+            console.log("healthcounter", healthCounter)
         }
         // Keep the player at the same position on the x axis
         this.player.x = gameOptions.playerStartPosition;
