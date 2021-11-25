@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import Gameover from "./Gameover.js";
 let game, timerText;
 let counter = 0;
 window.onload = function () {
@@ -9,11 +10,11 @@ window.onload = function () {
     physics: {
       default: "arcade",
       arcade: {
-        debug: true,
+        debug: false,
         gravity: { y: 0 },
       },
     },
-    scene: [GameScene],
+    scene: [GameScene, Gameover],
   };
 
   game = new Phaser.Game(config);
@@ -128,6 +129,7 @@ class GameScene extends Phaser.Scene {
     // this.physics.add.collider(player, platform);
     timerText = this.add.text(100, 100, "points: 0");
     timerText.setOrigin(0.5);
+
     this.time.addEvent({
       delay: 5000,
       callback: this.updateCounter,
@@ -198,7 +200,10 @@ class GameScene extends Phaser.Scene {
   update() {
     // if the player is falliong down, reset
     if (this.player.y > game.config.height) {
-      this.scene.start("GameScene");
+      this.scene.start("Gameover", Gameover);
+      let score = JSON.stringify(counter);
+      sessionStorage.setItem("Score", score);
+      // this.scene.remove("GameScene");
     }
     // Keep the player at the same position on the x axis
     this.player.x = gameOptions.playerStartPosition;
