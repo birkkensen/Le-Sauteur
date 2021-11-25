@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+// @ts-nocheck
 import Phaser from "phaser";
 let healthbar3;
 let healthbar2;
@@ -52,22 +54,29 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         this.load.image("platform", "./assets/platform.png");
+        this.load.image("healthbar1", "./assets/health1.png");
+        this.load.image("healthbar2", "./assets/health2.png");
+        this.load.image("healthbar3", "./assets/health3.png");
+
+
         this.load.spritesheet("dude", "./assets/thePlayer.png", { frameWidth: 96, frameHeight: 128 });
-        this.load.spritesheet("health3", "./assets/health.png", { frameWidth: 150, frameHeight: 28 })
-        this.load.spritesheet("health2", "./assets/health.png", { frameWidth: 100, frameHeight: 28 })
-        this.load.spritesheet("health1", "./assets/health.png", { frameWidth: 50, frameHeight: 28 })
+        this.load.spritesheet("coin", "./assets/coin.png", { frameWidth: 20, frameHeight: 20 });
     }
 
     create() {
+
 
         center = {
             x: this.physics.world.bounds.width / 2,
             y: this.physics.world.bounds.height / 2,
         }
 
-        healthbar3 = this.add.image(center.x * 2 - 140, 20, "health3")
-        healthbar2 = this.add.image(center.x * 2 - 140, 20, "health2")
-        healthbar1 = this.add.image(center.x * 2 - 140, 20, "health1")
+        // healthbar3 = this.add.sprite(center.x * 2 - 140, 20, "health3")
+        // healthbar2 = this.add.sprite(center.x * 2 - 140, 20, "health2")
+        // healthbar1 = this.add.sprite(center.x * 2 - 140, 20, "health1")
+        healthbar3 = this.add.image(center.x * 2 - 140, 20, "healthbar3")
+        healthbar2 = this.add.image(center.x * 2 - 140, 20, "healthbar2")
+        healthbar1 = this.add.image(center.x * 2 - 140, 20, "healthbar1")
         healthbar2.visible = false;
         healthbar1.visible = false;
         healthbar3.visible = false;
@@ -85,6 +94,17 @@ class GameScene extends Phaser.Scene {
         this.anims.create({
             key: "jump",
             frames: [{ key: "dude", frame: 4 }],
+        });
+        //
+        this.anims.create({
+            key: "rotate",
+            frames: this.anims.generateFrameNumbers("coin", {
+                start: 0,
+                end: 5
+            }),
+            frameRate: 15,
+            yoyo: true,
+            repeat: -1
         });
 
         // group with all active platforms.
@@ -155,6 +175,70 @@ class GameScene extends Phaser.Scene {
             callbackScope: this,
             loop: true,
         });
+        this.coinGroup = this.add.group({
+
+            // once a coin is removed, it's added to the pool
+            removeCallback: function(coin) {
+                coin.scene.coinPool.add(coin)
+            }
+        });
+
+        // coin pool
+        this.coinPool = this.add.group({
+
+            // once a coin is removed from the pool, it's added to the active coins group
+            removeCallback: function(coin) {
+                coin.scene.coinGroup.add(coin)
+            }
+        });
+        // setting collisions between the player and the coin group
+        this.physics.add.overlap(this.player, this.coinGroup, function(player, coin) {
+
+            this.tweens.add({
+                targets: coin,
+                y: coin.y - 100,
+                alpha: 0,
+                duration: 800,
+                ease: "Cubic.easeOut",
+                callbackScope: this,
+                onComplete: function() {
+                    this.coinGroup.killAndHide(coin);
+                    this.coinGroup.remove(coin);
+                }
+            });
+
+        }, null, this);
+
+        // if this is not the starting platform...
+        if (this.addedPlatforms > 1) {
+
+            // is there a coin over the platform?
+            if (Phaser.Math.Between(1, 100) <= gameOptions.coinPercent) {
+                if (this.coinPool.getLength()) {
+                    let coin = this.coinPool.getFirst();
+                    coin.x = posX;
+                    // @ts-ignore
+                    coin.y = posY - 96;
+                    coin.alpha = 1;
+                    coin.active = true;
+                    coin.visible = true;
+                    this.coinPool.remove(coin);
+                } else {
+                    // @ts-ignore
+                    // eslint-disable-next-line no-undef
+                    let coin = this.physics.add.sprite(posX, posY - 96, "coin");
+                    coin.setImmovable(true);
+                    coin.setVelocityX(platform.body.velocity.x);
+                    coin.anims.play("rotate");
+                    coin.setDepth(2);
+                    this.coinGroup.add(coin);
+                }
+            }
+
+            // is there a fire over the platform?
+
+        }
+        //
     }
 
     // the core of the script: platform are added from the pool or created on the fly
@@ -193,6 +277,7 @@ class GameScene extends Phaser.Scene {
             gameOptions.platformSpawnRange[0],
             gameOptions.platformSpawnRange[1]
         );
+
     }
     updateCounter() {
         counter++;
@@ -214,42 +299,48 @@ class GameScene extends Phaser.Scene {
             this.player.anims.stop();
         }
     }
-
-    update() {
-
-        // if the player is falliong down, reset
-        if (this.player.y > game.config.height) {
-            this.scene.start("GameScene");
-
-
-            if (healthCounter == 3) {
+    checkhealth() {
+        switch (healthCounter) {
+            case 3:
                 healthbar3.visible = true;
                 healthbar2.visible = false;
                 healthbar1.visible = false;
 
+                break;
+            case 2:
 
-            }
-
-            if (healthCounter == 2) {
                 healthbar3.visible = false;
                 healthbar2.visible = true;
                 healthbar1.visible = false;
+                break;
+            case 1:
 
-
-            }
-            if (healthCounter == 1) {
                 healthbar3.visible = false;
                 healthbar2.visible = false;
                 healthbar1.visible = true;
+                break;
+            case 0:
+                healthbar3.visible = false;
+                healthbar2.visible = false;
+                healthbar1.visible = false;
 
+                break;
 
-            }
-            if (healthCounter <= 0) {
+            case -1:
                 this.scene.stop("GameScene");
+                break;
 
-                console.log('finish')
 
-            }
+        }
+    }
+
+    update() {
+        this.checkhealth();
+        // if the player is falliong down, reset
+        if (this.player.y > game.config.height) {
+            this.scene.restart("GameScene");
+            this.checkhealth();
+            console.log(healthbar3)
             healthCounter--;
             console.log("healthcounter", healthCounter)
         }
