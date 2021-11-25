@@ -19,7 +19,6 @@ window.onload = function () {
   game = new Phaser.Game(config);
 };
 
-// let gamePoints = 0;
 
 let gameOptions = {
   platformSpeedRange: [300, 300], //speed range in px/sec
@@ -52,21 +51,10 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
-    // setting player animation
-    this.anims.create({
-      key: "run",
-      frames: this.anims.generateFrameNumbers("dude", {
-        start: 0,
-        end: 3,
-      }),
-      frameRate: 8,
-      repeat: -1,
-    });
-
-    this.anims.create({
-      key: "jump",
-      frames: [{ key: "dude", frame: 4 }],
-    });
+    center = {
+      x: this.physics.world.bounds.width / 2,
+      y: this.physics.world.bounds.height / 2,
+    };
 
     this.anims.create({ 
       key: "rotate",
@@ -323,53 +311,13 @@ class GameScene extends Phaser.Scene {
   
 
   update() {
-    // if the player is falliong down, reset
-    if (this.player.y > game.config.height) {
-      this.scene.start("GameScene");
-    }
-    // Keep the player at the same position on the x axis
-    this.player.x = gameOptions.playerStartPosition;
-    // recycling platforms
-    let minDistance = game.config.width;
-    let rightmostPlatformHeight = 0;
-    this.platformGroup.getChildren().forEach(function (platform) {
-      // @ts-ignore Property 'x' && 'displawidth' does not exist on type 'GameObject'.
-      let platformDistance = game.config.width - platform.x - platform.displayWidth / 2;
-      if (platformDistance < minDistance) {
-        minDistance = platformDistance;
-        // @ts-ignore Property 'y' does not exist on type 'GameObject'.
-        rightmostPlatformHeight = platform.y;
-      }
-      // @ts-ignore Property 'x' && 'displawidth' does not exist on type 'GameObject'.
-      if (platform.x < -platform.displayWidth / 2) {
-        this.platformGroup.killAndHide(platform);
-        this.platformGroup.remove(platform);
-      }
-    }, this);
-
-    // adding new platforms
-    if (minDistance > this.nextPlatformDistance) {
-      let nextPlatformWidth = Phaser.Math.Between(
-        gameOptions.platformSizeRange[0],
-        gameOptions.platformSizeRange[1]
-      );
-      let platformRandomHeight =
-        gameOptions.platformHeightScale *
-        Phaser.Math.Between(gameOptions.platformHeightRange[0], gameOptions.platformHeightRange[1]);
-      let nextPlatformGap = rightmostPlatformHeight + platformRandomHeight;
-
-      let minPlatformHeight = game.config.height * gameOptions.platformVerticalLimit[0];
-      let maxPlatformHeight = game.config.height * gameOptions.platformVerticalLimit[1];
-      let nextPlatformHeight = Phaser.Math.Clamp(
-        nextPlatformGap,
-        minPlatformHeight,
-        maxPlatformHeight
-      );
-      this.addPlatform(
-        nextPlatformWidth,
-        game.config.width + nextPlatformWidth / 2,
-        nextPlatformHeight
-      );
+    this.physics.add.collider(platform, player, landing, null, this);
+    if (controls.up.isDown) {
+      player.setVelocityY(-500);
+      console.log("up");
+    } else if (controls.down.isDown) {
+      player.setVelocityY(500);
+      console.log("down");
     }
 
     // adding new coins
@@ -388,11 +336,8 @@ class GameScene extends Phaser.Scene {
     //   }
     // }, this);
 
-
-
-    
-
   }
 }
 
 export default GameScene;
+
