@@ -1,21 +1,21 @@
-import Phaser from "phaser";
+// import Phaser from "phaser";
 
-import GameScene from "./scenes/GameScene";
-var startGame = () => {
-  return new Phaser.Game(config);
-};
+// import GameScene from "./scenes/GameScene";
+// var startGame = () => {
+//   return new Phaser.Game(config);
+// };
 
-const config = {
-  type: Phaser.AUTO,
-  width: window.innerWidth,
-  height: window.innerHeight,
-  physics: {
-    default: "arcade",
-    // arcade: {
-    //   gravity: { y: 900 },
-    // },
-  },
-  scene: [GameScene],
-};
+// const config = {
+//   type: Phaser.AUTO,
+//   width: window.innerWidth,
+//   height: window.innerHeight,
+//   physics: {
+//     default: "arcade",
+//     // arcade: {
+//     //   gravity: { y: 900 },
+//     // },
+//   },
+//   scene: [StartScene, GameScene],
+// };
 
-export default startGame;
+// export default startGame;
