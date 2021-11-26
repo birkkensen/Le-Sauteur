@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 let game, timerText, ball;
 let counter = 0;
+
 window.onload = function () {
   const config = {
     type: Phaser.AUTO,
@@ -78,7 +79,8 @@ class GameScene extends Phaser.Scene {
       repeat: -1,
     });
     
-  
+
+
     // group with all active platforms.
     this.platformGroup = this.add.group({
       // once a platform is removed, it's added to the pool
@@ -145,6 +147,8 @@ class GameScene extends Phaser.Scene {
       game.config.height * 0.5,
       "dude"
     );
+   
+    
     //setting collision between player and coins
     this.physics.add.overlap(this.player, this.coinGroup, function(player, coin) {
       this.tweens.add({
@@ -250,6 +254,10 @@ class GameScene extends Phaser.Scene {
       gameOptions.platformSpawnRange[0],
       gameOptions.platformSpawnRange[1]
     );
+
+
+
+
     //if this is not the starting platform?
     if(this.addedPlatforms > 1) {
       //if there is a coin over the platform?
@@ -298,6 +306,7 @@ class GameScene extends Phaser.Scene {
       }
     }
   }
+
   updateCounter() {
     counter++;
     timerText.setText("points: " + counter);
@@ -320,7 +329,6 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  
 
   update() {
     // if the player is falliong down, reset
@@ -381,18 +389,23 @@ class GameScene extends Phaser.Scene {
       }
     }, this);
 
-    // this.ballGroup.getChildren().forEach(function(ball) {
-    //   // @ts-ignore
-    //   if(ball.x < - ball.displayWidth / 2) {
-    //     this.removeHealth(ball);
-    //   }
-    // }, this);
+    // adding new bowling balls
+    this.ballGroup.getChildren().forEach(function(ball) {
+      // @ts-ignore
+      if (ball.x < - ball.displayWidth / 2) {
+        this.ballGroup.killAndHide(ball);
+        this.ballGroup.remove(ball);
+      }
+    }, this);
 
+    
+    
 
 
     
 
   }
 }
+
 
 export default GameScene;
