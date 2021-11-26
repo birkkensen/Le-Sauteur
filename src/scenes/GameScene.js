@@ -1,8 +1,9 @@
 import Phaser from "phaser";
 import config from "../main.js";
-let game, timerText, ball;
-let counter = 0;
-
+let game, timerText, ball, healthbar1, healthbar2, healthbar3;
+let score = 0;
+let healthCounter = 3;
+var overlapTriggered = false;
 window.onload = function () {
   game = new Phaser.Game(config);
 };
@@ -21,7 +22,7 @@ let gameOptions = {
   jumpForce: 500,
   platformVerticalLimit: [0.4, 0.8],
   playerStartPosition: 200, //x position
-  coinPercent: 25, // % of probability of coin appearing
+  coinPercent: 100, // % of probability of coin appearing
   ballPercent: 25, // % of probability of spike appearing
 };
 
@@ -38,6 +39,13 @@ class GameScene extends Phaser.Scene {
       y: this.physics.world.bounds.height / 2,
     };
     this.addBackground();
+    healthbar3 = this.add.image(this.center.x * 2 - 140, 20, "healthbar3");
+    healthbar2 = this.add.image(this.center.x * 2 - 140, 20, "healthbar2");
+    healthbar1 = this.add.image(this.center.x * 2 - 140, 20, "healthbar1");
+    healthbar2.visible = false;
+    healthbar1.visible = false;
+    healthbar3.visible = false;
+    // this.checkhealth();
     // setting player animation
     this.anims.create({
       key: "run",
@@ -141,6 +149,11 @@ class GameScene extends Phaser.Scene {
       this.player,
       this.coinGroup,
       function (player, coin) {
+        if (overlapTriggered) {
+          return;
+        }
+        overlapTriggered = true;
+        this.updateScore();
         this.tweens.add({
           targets: coin,
           // @ts-ignore
@@ -152,6 +165,7 @@ class GameScene extends Phaser.Scene {
           onComplete: function () {
             this.coinGroup.killAndHide(coin);
             this.coinGroup.remove(coin);
+            overlapTriggered = false;
           },
         });
       },
@@ -159,19 +173,22 @@ class GameScene extends Phaser.Scene {
       this
     );
 
-    //setting collision between player and bowling ball
     this.physics.add.overlap(
       this.player,
       this.ballGroup,
       function (player, ball) {
+        this.ballGroup.killAndHide(ball);
+        this.ballGroup.remove(ball);
+        this.checkHealth();
+        healthCounter--;
         this.tweens.add({
-          targets: ball,
-          // @ts-ignore
+          targets: player,
+          alpha: 0,
+          duration: 100,
+          repeat: 3,
+          yoyo: true,
           callbackScope: this,
-          onComplete: function () {
-            // this.removeHealth(ball);
-            // if removeHealth hit 3 times, this.dying = true;
-          },
+          onComplete: function () {},
         });
       },
       null,
@@ -209,19 +226,19 @@ class GameScene extends Phaser.Scene {
       fontFamily: "Arcade",
     });
     // timerText.setOrigin(0.5);
-    this.time.addEvent({
-      delay: 5000,
-      callback: this.updateCounter,
-      callbackScope: this,
-      loop: true,
-    });
+    //   this.time.addEvent({
+    //     delay: 5000,
+    //     callback: this.updateCounter,
+    //     callbackScope: this,
+    //     loop: true,
+    //   });
   }
   addBackground() {
     this.anims.create({
       key: "background",
       frames: this.anims.generateFrameNames("bg", {
         start: 0,
-        end: 7,
+        end: 6,
       }),
       frameRate: 12,
       repeat: -1,
@@ -319,10 +336,11 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  updateCounter() {
-    counter++;
-    timerText.setText("Points: " + counter);
+  updateScore() {
+    score++;
+    timerText.setText("Points: " + score);
   }
+
   jump() {
     if (
       !this.dying &&
@@ -342,12 +360,9 @@ class GameScene extends Phaser.Scene {
   }
 
   update() {
-    // if the player is falliong down, reset
+    this.checkHealth();
     if (this.player.y > game.config.height) {
-      this.score = JSON.stringify(counter);
-      sessionStorage.setItem("Score", this.score);
-      counter = 0;
-      this.scene.start("Gameover");
+      this.gameover();
     }
     // Keep the player at the same position on the x axis
     this.player.x = gameOptions.playerStartPosition;
@@ -411,6 +426,38 @@ class GameScene extends Phaser.Scene {
         this.ballGroup.remove(ball);
       }
     }, this);
+  }
+
+  checkHealth() {
+    switch (healthCounter) {
+      case 3:
+        healthbar3.visible = true;
+        healthbar2.visible = false;
+        healthbar1.visible = false;
+        break;
+      case 2:
+        healthbar3.visible = false;
+        healthbar2.visible = true;
+        healthbar1.visible = false;
+        break;
+      case 1:
+        healthbar3.visible = false;
+        healthbar2.visible = false;
+        healthbar1.visible = true;
+        break;
+      case 0:
+        this.gameover();
+        break;
+    }
+  }
+
+  gameover() {
+    this.score = JSON.stringify(score);
+    console.log(score);
+    sessionStorage.setItem("Score", this.score);
+    score = 0;
+    healthCounter = 3;
+    this.scene.start("Gameover");
   }
 }
 

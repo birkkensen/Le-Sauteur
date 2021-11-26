@@ -12,6 +12,9 @@ export default class StartScene extends Phaser.Scene {
     });
     this.load.image("platform", "./assets/moss-platform.png");
     this.load.image("ball", "./assets/bowling-ball-pixel.png");
+    this.load.image("healthbar1", "./assets/health1.png");
+    this.load.image("healthbar2", "./assets/health2.png");
+    this.load.image("healthbar3", "./assets/health3.png");
     this.load.spritesheet("dude", "./assets/thePlayer.png", { frameWidth: 96, frameHeight: 128 });
     this.load.spritesheet("coins", "./assets/coins.png", { frameWidth: 32, frameHeight: 32 });
   }
