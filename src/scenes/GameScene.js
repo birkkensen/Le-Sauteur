@@ -32,14 +32,12 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-  preload() {
-    this.load.image("platform", "./assets/platform.png");
-    this.load.image("ball", "./assets/redball.png");
-    this.load.spritesheet("dude", "./assets/thePlayer.png", { frameWidth: 96, frameHeight: 128 });
-    this.load.spritesheet("coins", "./assets/coins.png", { frameWidth: 32, frameHeight: 32 });
-  }
-
   create() {
+    this.center = {
+      x: this.physics.world.bounds.width / 2,
+      y: this.physics.world.bounds.height / 2,
+    };
+    this.addBackground();
     // setting player animation
     this.anims.create({
       key: "run",
@@ -124,7 +122,7 @@ class GameScene extends Phaser.Scene {
     // number of consecutive jumps made by the player so far
 
     // Add jump on spacebar
-    this.input.on("pointerdown", this.jump, this);
+    this.input.keyboard.on("keydown-" + "SPACE", this.jump, this);
 
     this.playerJumps = 0;
     this.dying = false;
@@ -134,6 +132,9 @@ class GameScene extends Phaser.Scene {
       game.config.height * 0.5,
       "dude"
     );
+    this.player.setGravityY(gameOptions.playerGravity);
+    this.player.setDepth(2);
+    this.player.setScale(0.5);
 
     //setting collision between player and coins
     this.physics.add.overlap(
@@ -177,8 +178,6 @@ class GameScene extends Phaser.Scene {
       this
     );
 
-    this.player.setGravityY(gameOptions.playerGravity);
-    this.player.setDepth(2);
     // adding a platform to the game, the arguments are platform width, x position and y position
     this.addPlatform(
       game.config.width,
@@ -188,7 +187,7 @@ class GameScene extends Phaser.Scene {
     // the player is not dying
     (this.dying = false),
       // checking for input
-      this.input.on("pointerdown", this.jump, this),
+      // this.input.on("pointerdown", this.jump, this),
       // setting collisions between the player and the platform group
       (this.platformCollider = this.physics.add.collider(
         this.player,
@@ -204,14 +203,32 @@ class GameScene extends Phaser.Scene {
       ));
 
     // this.physics.add.collider(player, platform);
-    timerText = this.add.text(100, 100, "points: 0");
-    timerText.setOrigin(0.5);
+    timerText = this.add.text(10, 10, "Points: 0", {
+      fontSize: "16px",
+      color: "#000",
+      fontFamily: "Arcade",
+    });
+    // timerText.setOrigin(0.5);
     this.time.addEvent({
       delay: 5000,
       callback: this.updateCounter,
       callbackScope: this,
       loop: true,
     });
+  }
+  addBackground() {
+    this.anims.create({
+      key: "background",
+      frames: this.anims.generateFrameNames("bg", {
+        start: 0,
+        end: 7,
+      }),
+      frameRate: 12,
+      repeat: -1,
+    });
+    this.bg = this.add.sprite(this.center.x, this.center.y, "bg");
+    this.bg.anims.play("background");
+    this.bg.setDisplaySize(this.center.x * 2 + 2, this.center.y * 2 + 2);
   }
 
   // the core of the script: platform are added from the pool or created on the fly
@@ -234,7 +251,7 @@ class GameScene extends Phaser.Scene {
       platform.displayWidth = platformWidth;
       platform.tileScaleX = 1 / platform.scaleX;
     } else {
-      platform = this.add.tileSprite(posX, posY, platformWidth, 64, "platform");
+      platform = this.add.tileSprite(posX, posY, platformWidth, 32, "platform");
       this.physics.add.existing(platform);
       // @ts-ignore
       platform.body.setImmovable(true);
@@ -292,8 +309,8 @@ class GameScene extends Phaser.Scene {
           );
           ball.setImmovable(true);
           ball.setVelocityX(platform.body.velocity.x);
-          ball.setSize(8, 2);
-          ball.setScale(0.05);
+          // ball.setSize(8, 2);
+          ball.setScale(0.25);
           //ball.anims.play create rotate animation
           ball.setDepth(2);
           this.ballGroup.add(ball);
@@ -304,7 +321,7 @@ class GameScene extends Phaser.Scene {
 
   updateCounter() {
     counter++;
-    timerText.setText("points: " + counter);
+    timerText.setText("Points: " + counter);
   }
   jump() {
     if (
@@ -327,7 +344,10 @@ class GameScene extends Phaser.Scene {
   update() {
     // if the player is falliong down, reset
     if (this.player.y > game.config.height) {
-      this.scene.start("GameScene");
+      this.score = JSON.stringify(counter);
+      sessionStorage.setItem("Score", this.score);
+      counter = 0;
+      this.scene.start("Gameover");
     }
     // Keep the player at the same position on the x axis
     this.player.x = gameOptions.playerStartPosition;
