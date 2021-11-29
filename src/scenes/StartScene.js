@@ -17,6 +17,7 @@ export default class StartScene extends Phaser.Scene {
     this.load.image("healthbar3", "./assets/health3.png");
     this.load.spritesheet("dude", "./assets/thePlayer.png", { frameWidth: 96, frameHeight: 128 });
     this.load.spritesheet("coins", "./assets/coins.png", { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet("naruto", "./assets/narutosprite.png", { frameWidth: 63, frameHeight: 59}); 
   }
 
   create() {

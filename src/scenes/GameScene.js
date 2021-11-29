@@ -47,11 +47,21 @@ class GameScene extends Phaser.Scene {
     healthbar3.visible = false;
     // this.checkhealth();
     // setting player animation
+    // this.anims.create({
+    //   key: "run",
+    //   frames: this.anims.generateFrameNumbers("dude", {
+    //     start: 0,
+    //     end: 3,
+    //   }),
+    //   frameRate: 8,
+    //   repeat: -1,
+    // });
+
     this.anims.create({
       key: "run",
-      frames: this.anims.generateFrameNumbers("dude", {
-        start: 0,
-        end: 3,
+      frames: this.anims.generateFrameNumbers("naruto", {
+        start: 1,
+        end: 6,
       }),
       frameRate: 8,
       repeat: -1,
@@ -59,8 +69,18 @@ class GameScene extends Phaser.Scene {
 
     this.anims.create({
       key: "jump",
-      frames: [{ key: "dude", frame: 4 }],
+      frames: [{ key: "naruto", frame: 7}],
     });
+
+    this.anims.create({
+      key: "doublejump",
+      frames: this.anims.generateFrameNumbers("naruto", {
+        start: 8,
+        end: 11,
+      }),
+      frameRate:14,
+      repeat:0,
+    })
 
     this.anims.create({
       key: "rotate",
@@ -138,11 +158,12 @@ class GameScene extends Phaser.Scene {
     this.player = this.physics.add.sprite(
       gameOptions.playerStartPosition,
       game.config.height * 0.5,
-      "dude"
+      "naruto"
     );
     this.player.setGravityY(gameOptions.playerGravity);
     this.player.setDepth(2);
-    this.player.setScale(0.6);
+    this.player.setScale(1.3);
+    this.player.setBodySize(47,47);
 
 
     //setting collision between player and coins
@@ -357,6 +378,10 @@ class GameScene extends Phaser.Scene {
       // stops animation
       this.player.anims.play("jump");
       this.player.anims.stop();
+
+      if(this.playerJumps === 2) {
+        this.player.anims.play("doublejump"); 
+      }
     }
   }
 
