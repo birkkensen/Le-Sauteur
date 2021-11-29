@@ -22,7 +22,7 @@ let gameOptions = {
   jumpForce: 500,
   platformVerticalLimit: [0.4, 0.8],
   playerStartPosition: 200, //x position
-  coinPercent: 100, // % of probability of coin appearing
+  coinPercent: 50, // % of probability of coin appearing
   ballPercent: 25, // % of probability of spike appearing
 };
 
@@ -142,7 +142,8 @@ class GameScene extends Phaser.Scene {
     );
     this.player.setGravityY(gameOptions.playerGravity);
     this.player.setDepth(2);
-    this.player.setScale(0.5);
+    this.player.setScale(0.6);
+
 
     //setting collision between player and coins
     this.physics.add.overlap(
@@ -157,7 +158,7 @@ class GameScene extends Phaser.Scene {
         this.tweens.add({
           targets: coin,
           // @ts-ignore
-          y: coin.y - 100,
+          y: coin.y - 80,
           alpha: 0,
           duration: 800,
           ease: "Cubic.easeOut",
@@ -298,7 +299,7 @@ class GameScene extends Phaser.Scene {
           coin.visible = true;
           this.coinPool.remove(coin);
         } else {
-          let coin = this.physics.add.sprite(posX, posY - 96, "coins");
+          let coin = this.physics.add.sprite(posX, posY - 93, "coins");
           coin.setImmovable(true);
           coin.setVelocityX(platform.body.velocity.x);
           // coin.anims.play("rotate");
@@ -321,13 +322,13 @@ class GameScene extends Phaser.Scene {
         } else {
           ball = this.physics.add.sprite(
             posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth),
-            posY - 52,
+            posY - 30,
             "ball"
           );
           ball.setImmovable(true);
           ball.setVelocityX(platform.body.velocity.x);
           // ball.setSize(8, 2);
-          ball.setScale(0.25);
+          ball.setScale(0.15);
           //ball.anims.play create rotate animation
           ball.setDepth(2);
           this.ballGroup.add(ball);
