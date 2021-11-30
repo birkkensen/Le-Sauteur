@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import config from "../main.js";
-let game, timerText, ball, healthbar1, healthbar2, healthbar3;
+let game, timerText, ball, sasuke, sasukefire, healthbar1, healthbar2, healthbar3;
 let score = 0;
 let healthCounter = 3;
 var overlapTriggered = false;
@@ -22,8 +22,10 @@ let gameOptions = {
   jumpForce: 500,
   platformVerticalLimit: [0.4, 0.8],
   playerStartPosition: 200, //x position
-  coinPercent: 50, // % of probability of coin appearing
-  ballPercent: 25, // % of probability of spike appearing
+  coinPercent: 25, // % of probability of coin appearing
+  ballPercent: 10, // % of probability of spike appearing
+  sasukePercent: 10, // % of probability of sasuke appearing
+  sasukefirePercent: 50, // % of probability of sasuke spitting fire appearing
 };
 
 class GameScene extends Phaser.Scene {
@@ -63,7 +65,7 @@ class GameScene extends Phaser.Scene {
         start: 1,
         end: 6,
       }),
-      frameRate: 8,
+      frameRate: 21,
       repeat: -1,
     });
 
@@ -88,8 +90,28 @@ class GameScene extends Phaser.Scene {
         start: 0,
         end: 7,
       }),
-      frameRate: 20,
+      frameRate: 15,
       repeat: -1,
+    });
+    
+    this.anims.create({
+      key:"sasukestanding",
+      frames: this.anims.generateFrameNumbers("sasuke", {
+        start: 0,
+        end: 3,
+      }),
+      frameRate: 7,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key:"sasukefire",
+      frames: this.anims.generateFrameNumbers("sasukefire", {
+        start: 0,
+        end: 8,
+      }),
+      frameRate: 12,
+      repeat:-1,
     });
 
     // group with all active platforms.
@@ -145,6 +167,40 @@ class GameScene extends Phaser.Scene {
       },
     });
 
+    //group all active sasuke
+    this.sasukeGroup = this.add.group({
+      removeCallback: function (sasuke) {
+        //once a sasuke is removed it's added to the pool
+        // @ts-ignore Property 'ballPool' does not exist on type 'Scene'.
+        sasuke.scene.sasukePool.add(sasuke);
+      },
+    });
+
+    //sasuke pool
+    this.sasukePool = this.add.group({
+      removeCallback: function (sasuke) {
+        // @ts-ignore Property 'ballGroup' does not exist on type 'Scene'.
+        sasuke.scene.sasukeGroup.add(sasuke);
+      },
+    });
+
+    //group all active sasukefire
+    this.sasukefireGroup = this.add.group({
+      removeCallback: function (sasukefire) {
+        //once a sasuke is removed it's added to the pool
+        // @ts-ignore Property 'ballPool' does not exist on type 'Scene'.
+        sasukefire.scene.sasukefirePool.add(sasukefire);
+      },
+    });
+
+    //sasukefire pool
+    this.sasukefirePool = this.add.group({
+      removeCallback: function (sasukefire) {
+        // @ts-ignore Property 'ballGroup' does not exist on type 'Scene'.
+        sasukefire.scene.sasukefireGroup.add(sasukefire);
+      },
+    });
+
     // keeping track of added platforms
     this.addedPlatforms = 0;
     // number of consecutive jumps made by the player so far
@@ -161,7 +217,7 @@ class GameScene extends Phaser.Scene {
       "naruto"
     );
     this.player.setGravityY(gameOptions.playerGravity);
-    this.player.setDepth(2);
+    this.player.setDepth(5);
     this.player.setScale(1.3);
     this.player.setBodySize(47,47);
 
@@ -217,6 +273,50 @@ class GameScene extends Phaser.Scene {
       this
     );
 
+    this.physics.add.overlap(
+      this.player,
+      this.sasukeGroup,
+      function (player, sasuke) {
+        this.sasukeGroup.killAndHide(sasuke);
+        this.sasukeGroup.remove(sasuke);
+        this.checkHealth();
+        healthCounter--;
+        this.tweens.add({
+          targets: player,
+          alpha: 0,
+          duration: 100,
+          repeat: 3,
+          yoyo: true,
+          callbackScope: this,
+          onComplete: function () {},
+        });
+      },
+      null,
+      this
+    );
+
+    this.physics.add.overlap(
+      this.player,
+      this.sasukefireGroup,
+      function (player, sasukefire) {
+        this.sasukefireGroup.killAndHide(sasukefire);
+        this.sasukefireGroup.remove(sasukefire);
+        this.checkHealth();
+        healthCounter--;
+        this.tweens.add({
+          targets: player,
+          alpha: 0,
+          duration: 100,
+          repeat: 3,
+          yoyo: true,
+          callbackScope: this,
+          onComplete: function () {},
+        });
+      },
+      null,
+      this
+    );
+
     // adding a platform to the game, the arguments are platform width, x position and y position
     this.addPlatform(
       game.config.width,
@@ -255,6 +355,7 @@ class GameScene extends Phaser.Scene {
     //     loop: true,
     //   });
   }
+
   addBackground() {
     this.anims.create({
       key: "background",
@@ -268,6 +369,7 @@ class GameScene extends Phaser.Scene {
     this.bg = this.add.sprite(this.center.x, this.center.y, "bg");
     this.bg.anims.play("background");
     this.bg.setDisplaySize(this.center.x * 2 + 2, this.center.y * 2 + 2);
+    this.bg.setDepth(4);
   }
 
   // the core of the script: platform are added from the pool or created on the fly
@@ -299,7 +401,7 @@ class GameScene extends Phaser.Scene {
         Phaser.Math.Between(gameOptions.platformSpeedRange[0], gameOptions.platformSpeedRange[1]) *
           -1
       );
-      platform.setDepth(2);
+      platform.setDepth(5);
       this.platformGroup.add(platform);
     }
     this.nextPlatformDistance = Phaser.Math.Between(
@@ -314,7 +416,7 @@ class GameScene extends Phaser.Scene {
         if (this.coinPool.getLength()) {
           let coin = this.coinPool.getFirst();
           coin.x = posX;
-          coin.y = posY - 96;
+          coin.y = posY - 86;
           coin.alpha = 1;
           coin.active = true;
           coin.visible = true;
@@ -325,7 +427,7 @@ class GameScene extends Phaser.Scene {
           coin.setVelocityX(platform.body.velocity.x);
           // coin.anims.play("rotate");
           coin.anims.play("rotate", true);
-          coin.setDepth(2);
+          coin.setDepth(5);
           this.coinGroup.add(coin);
         }
       }
@@ -335,7 +437,7 @@ class GameScene extends Phaser.Scene {
         if (this.ballPool.getLength()) {
           ball = this.ballPool.getFirst();
           ball.x = posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth);
-          ball.y = posY - 52;
+          ball.y = posY - 30;
           ball.alpha = 1;
           ball.active = true;
           ball.visible = true;
@@ -351,8 +453,62 @@ class GameScene extends Phaser.Scene {
           // ball.setSize(8, 2);
           ball.setScale(0.15);
           //ball.anims.play create rotate animation
-          ball.setDepth(2);
+          ball.setDepth(5);
           this.ballGroup.add(ball);
+        }
+      }
+
+      //if there is a sasuke over the platform?
+      if (Phaser.Math.Between(1, 100) <= gameOptions.sasukePercent) {
+        if (this.sasukePool.getLength()) {
+          sasuke = this.sasukePool.getFirst();
+          sasuke.x = posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth);
+          sasuke.y = posY - 30;
+          sasuke.alpha = 1;
+          sasuke.active = true;
+          sasuke.visible = true;
+          this.sasukePool.remove(sasuke);
+        } else {
+          sasuke = this.physics.add.sprite(
+            posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth),
+            posY - 48,
+            "sasuke"
+          );
+          sasuke.setImmovable(true);
+          sasuke.setVelocityX(platform.body.velocity.x);
+          // sasuke.setSize(8, 2);
+          sasuke.setScale(1.15);
+          sasuke.setDepth(5);
+          sasuke.setFlipX(true)
+          this.sasukeGroup.add(sasuke);
+          sasuke.anims.play('sasukestanding')
+        }
+      }
+
+      //if there is a sasukefire over the platform?
+      if (Phaser.Math.Between(1, 100) <= gameOptions.sasukefirePercent) {
+        if (this.sasukefirePool.getLength()) {
+          sasukefire = this.sasukefirePool.getFirst();
+          sasukefire.x = posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth);
+          sasukefire.y = posY - 30;
+          sasukefire.alpha = 1;
+          sasukefire.active = true;
+          sasukefire.visible = true;
+          this.sasukefirePool.remove(sasukefire);
+        } else {
+          sasukefire = this.physics.add.sprite(
+            posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth),
+            posY - 42,
+            "sasukefire"
+          );
+          sasukefire.setImmovable(true);
+          sasukefire.setVelocityX(platform.body.velocity.x);
+          // sasukefire.setSize(40, 45);
+          sasukefire.setScale(1.5);
+          sasukefire.setDepth(5);
+          sasukefire.setFlipX(true)
+          this.sasukefireGroup.add(sasukefire);
+          sasukefire.anims.play('sasukefire')
         }
       }
     }
@@ -384,6 +540,10 @@ class GameScene extends Phaser.Scene {
       }
     }
   }
+
+  // level1() {
+  //   this.anims.stop("background"); 
+  // }
 
   update() {
     this.checkHealth();
@@ -435,6 +595,13 @@ class GameScene extends Phaser.Scene {
       );
     }
 
+    //creating levels
+    // if(score === 2) {
+    //   this.level1();
+      
+    // }
+
+
     // adding new coins
     this.coinGroup.getChildren().forEach(function (coin) {
       // @ts-ignore
@@ -450,6 +617,24 @@ class GameScene extends Phaser.Scene {
       if (ball.x < -ball.displayWidth / 2) {
         this.ballGroup.killAndHide(ball);
         this.ballGroup.remove(ball);
+      }
+    }, this);
+
+    // adding new sasukes
+    this.sasukeGroup.getChildren().forEach(function (sasuke) {
+      // @ts-ignore
+      if (sasuke.x < -sasuke.displayWidth / 2) {
+        this.sasukeGroup.killAndHide(sasuke);
+        this.sasukeGroup.remove(sasuke);
+      }
+    }, this);
+
+    // adding new sasukefires
+    this.sasukefireGroup.getChildren().forEach(function (sasukefire) {
+      // @ts-ignore
+      if (sasukefire.x < -sasukefire.displayWidth / 2) {
+        this.sasukefireGroup.killAndHide(sasukefire);
+        this.sasukefireGroup.remove(sasukefire);
       }
     }, this);
   }
