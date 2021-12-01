@@ -19,10 +19,10 @@ let gameOptions = {
   jumpForce: 500,
   platformVerticalLimit: [0.4, 0.8],
   playerStartPosition: 200, //x position
-  coinPercent: 25, // % of probability of coin appearing
-  ballPercent: 100, // % of probability of spike appearing
-  sasukePercent: 35, // % of probability of sasuke appearing
-  sasukefirePercent: 10, // % of probability of sasuke spitting fire appearing
+  coinPercent: 50, // % of probability of coin appearing
+  ballPercent: 50, // % of probability of spike appearing
+  sasukePercent: 10, // % of probability of sasuke appearing
+  sasukefirePercent: 5, // % of probability of sasuke spitting fire appearing
 };
 
 export default class GameScene extends Phaser.Scene {
