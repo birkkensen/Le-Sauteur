@@ -48,11 +48,11 @@ export default class StartScene extends Phaser.Scene {
     });
 
     // * ======= Players ======== * //
-    this.load.spritesheet(THE_DUDE_PLAYER, "./assets/players/thePlayer.png", {
-      frameWidth: 96,
-      frameHeight: 128,
+    this.load.spritesheet(THE_DUDE_PLAYER, "./assets/players/theDude.png", {
+      frameWidth: 44.2,
+      frameHeight: 59,
     });
-    this.load.spritesheet("naruto", "./assets/players/narutosprite.png", {
+    this.load.spritesheet(NARUTO_PLAYER, "./assets/players/narutosprite.png", {
       frameWidth: 63.333,
       frameHeight: 59,
     });
@@ -104,18 +104,35 @@ export default class StartScene extends Phaser.Scene {
       this.playerText.y + offsetY,
       "The Dude",
       { fontFamily: "Arcade", fontSize: "20px", color: color },
-      () => this.choosenPlayer(THE_DUDE_PLAYER)
+      () =>
+        this.choosenPlayer(
+          THE_DUDE_PLAYER,
+          THE_DUDE_PLAYER + "-key",
+          4,
+          false,
+          THE_DUDE_PLAYER + "-run",
+          0,
+          3
+        )
     ).setOrigin(0.5, 0);
     this.add.existing(this.playerOne);
 
-    // ! ======= Not working - see line 4 ======== ! //
     this.playerTwo = new TextButton(
       this,
       this.center.x - offsetX,
       this.playerText.y + offsetY,
       "Naruto",
       { fontFamily: "Arcade", fontSize: "20px", color: color },
-      () => this.choosenPlayer(NARUTO_PLAYER)
+      () =>
+        this.choosenPlayer(
+          NARUTO_PLAYER,
+          NARUTO_PLAYER + "-key",
+          7,
+          true,
+          NARUTO_PLAYER + "-run",
+          1,
+          6
+        )
     ).setOrigin(0.5, 0);
     this.add.existing(this.playerTwo);
     // ! ======= Not working - see line 4 ======== ! //
@@ -207,8 +224,22 @@ export default class StartScene extends Phaser.Scene {
       this.musicBtn.setText("Sound On");
     }
   }
-  choosenPlayer(player) {
+  choosenPlayer(
+    player,
+    jumpKey,
+    frame,
+    doubleJump,
+    runningKey,
+    runningFrameStart,
+    runningFrameEnd
+  ) {
     this.player = player;
+    this.jumpKey = jumpKey;
+    this.jumpFrame = frame;
+    this.doubleJump = doubleJump;
+    this.runningKey = runningKey;
+    this.runningFrameStart = runningFrameStart;
+    this.runningFrameEnd = runningFrameEnd;
   }
   choosenBg(bg, key, frames, platform) {
     this.background = bg;
@@ -224,6 +255,12 @@ export default class StartScene extends Phaser.Scene {
     if (this.backgroundFrames === undefined) return;
     this.scene.start("GameScene", {
       player: this.player,
+      jumpKey: this.jumpKey,
+      jumpFrame: this.jumpFrame,
+      doubleJump: this.doubleJump,
+      runningKey: this.runningKey,
+      runningFrameStart: this.runningFrameStart,
+      runningFrameEnd: this.runningFrameEnd,
       background: this.background,
       backgroundKey: this.backgroundKey,
       platformKey: this.platformKey,

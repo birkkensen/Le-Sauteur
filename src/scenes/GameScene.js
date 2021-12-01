@@ -19,10 +19,10 @@ let gameOptions = {
   jumpForce: 500,
   platformVerticalLimit: [0.4, 0.8],
   playerStartPosition: 200, //x position
-  coinPercent: 25, // % of probability of coin appearing
-  ballPercent: 10, // % of probability of spike appearing
+  coinPercent: 100, // % of probability of coin appearing
+  ballPercent: 50, // % of probability of spike appearing
   sasukePercent: 10, // % of probability of sasuke appearing
-  sasukefirePercent: 50, // % of probability of sasuke spitting fire appearing
+  sasukefirePercent: 5, // % of probability of sasuke spitting fire appearing
 };
 
 export default class GameScene extends Phaser.Scene {
@@ -34,6 +34,12 @@ export default class GameScene extends Phaser.Scene {
 
   init(data) {
     this.character = data.player;
+    this.characterJumpKey = data.jumpKey;
+    this.jumpFrame = data.jumpFrame;
+    this.doubleJump = data.doubleJump;
+    this.runningKey = data.runningKey;
+    this.runningFrameStart = data.runningFrameStart;
+    this.runningFrameEnd = data.runningFrameEnd;
     this.background = data.background;
     this.backgroundKey = data.backgroundKey;
     this.center = data.center;
@@ -59,28 +65,19 @@ export default class GameScene extends Phaser.Scene {
     };
     // this.checkhealth();
     // setting player animation
-    // this.anims.create({
-    //   key: "run",
-    //   frames: this.anims.generateFrameNumbers("dude", {
-    //     start: 0,
-    //     end: 3,
-    //   }),
-    //   frameRate: 8,
-    //   repeat: -1,
-    // });
     this.anims.create({
-      key: "run",
-      frames: this.anims.generateFrameNumbers("naruto", {
-        start: 1,
-        end: 6,
+      key: this.runningKey,
+      frames: this.anims.generateFrameNumbers(this.character, {
+        start: this.runningFrameStart,
+        end: this.runningFrameEnd,
       }),
-      frameRate: 21,
+      frameRate: 8,
       repeat: -1,
     });
 
     this.anims.create({
-      key: "jump",
-      frames: [{ key: "naruto", frame: 7 }],
+      key: this.characterJumpKey,
+      frames: [{ key: this.character, frame: this.jumpFrame }],
     });
 
     this.anims.create({
@@ -112,21 +109,6 @@ export default class GameScene extends Phaser.Scene {
       frameRate: 7,
       repeat: -1,
     });
-
-    this.anims.create({
-      key: this.backgroundKey,
-      frames: this.anims.generateFrameNames(this.background, {
-        start: 0,
-        end: 7,
-      }),
-      frameRate: 12,
-      repeat: -1,
-    });
-    this.addBackground();
-    healthbar3 = this.add.image(this.center.x * 2 - 140, 20, "healthbar3").setVisible(false);
-    healthbar2 = this.add.image(this.center.x * 2 - 140, 20, "healthbar2").setVisible(false);
-    healthbar1 = this.add.image(this.center.x * 2 - 140, 20, "healthbar1").setVisible(false);
-
     this.anims.create({
       key: "sasukefire",
       frames: this.anims.generateFrameNumbers("sasukefire", {
@@ -136,6 +118,21 @@ export default class GameScene extends Phaser.Scene {
       frameRate: 12,
       repeat: -1,
     });
+
+    this.anims.create({
+      key: this.backgroundKey,
+      frames: this.anims.generateFrameNames(this.background, {
+        start: 0,
+        end: this.framesEnd,
+      }),
+      frameRate: 12,
+      repeat: -1,
+    });
+    this.addBackground();
+    healthbar3 = this.add.image(this.center.x * 2 - 140, 20, "healthbar3").setVisible(false);
+    healthbar2 = this.add.image(this.center.x * 2 - 140, 20, "healthbar2").setVisible(false);
+    healthbar1 = this.add.image(this.center.x * 2 - 140, 20, "healthbar1").setVisible(false);
+
     // * ======= Groups & Pools ======== * //
     // group with all active platforms.
     this.platformGroup = this.add.group({
@@ -189,12 +186,6 @@ export default class GameScene extends Phaser.Scene {
         ball.scene.ballGroup.add(ball);
       },
     });
-    // * ======= Player ======== * //
-    this.player = this.physics.add.sprite(
-      gameOptions.playerStartPosition,
-      game.config.height * 0.5,
-      this.character
-    );
 
     //group all active sasuke
     this.sasukeGroup = this.add.group({
@@ -230,25 +221,20 @@ export default class GameScene extends Phaser.Scene {
       },
     });
 
-    // keeping track of added platforms
-    this.addedPlatforms = 0;
     // number of consecutive jumps made by the player so far
-
-    // Add jump on spacebar
-    this.input.keyboard.on("keydown-" + "SPACE", this.jump, this);
 
     this.playerJumps = 0;
     this.dying = false;
-
+    // * ======= Player ======== * //
     this.player = this.physics.add.sprite(
       gameOptions.playerStartPosition,
       game.config.height * 0.5,
-      "naruto"
+      this.character
     );
     this.player.setGravityY(gameOptions.playerGravity);
     this.player.setDepth(5);
-    this.player.setScale(1.3);
-    this.player.setBodySize(47, 47);
+    // this.player.setScale(1.3);
+    // this.player.setBodySize(47, 47);
 
     this.playerLanding = this.sound.add("landing", { volume: 0.2 });
     this.playerJumps = 0;
@@ -368,7 +354,7 @@ export default class GameScene extends Phaser.Scene {
       () => {
         // play "run" animation if the player is on a platform
         if (!this.player.anims.isPlaying) {
-          this.player.anims.play("run");
+          this.player.anims.play(this.runningKey);
           this.playerLanding.play();
         }
       },
@@ -445,25 +431,27 @@ export default class GameScene extends Phaser.Scene {
       if (Phaser.Math.Between(1, 100) <= gameOptions.ballPercent) {
         if (this.ballPool.getLength()) {
           ball = this.ballPool.getFirst();
-          ball.x = posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth);
-          ball.y = posY - 30;
+          ball.x = posX - platformWidth / 2 + Phaser.Math.Between(10, platformWidth - 10);
+          ball.y = posY - 100;
           ball.alpha = 1;
           ball.active = true;
           ball.visible = true;
           this.ballPool.remove(ball);
         } else {
           ball = this.physics.add.sprite(
-            posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth),
-            posY - 30,
+            posX - platformWidth / 2 + Phaser.Math.Between(10, platformWidth - 10),
+            posY - 100,
             "ball"
           );
-          ball.setImmovable(true);
-          ball.setVelocityX(platform.body.velocity.x);
           // ball.setSize(8, 2);
           ball.setScale(0.15);
-          //ball.anims.play create rotate animation
           ball.setDepth(5);
+          ball.setOrigin(0.5);
           this.ballGroup.add(ball);
+          ball.setGravityY(500);
+          ball.setVelocityX(0);
+          ball.setPushable(true);
+          this.physics.add.collider(this.ballGroup, this.platformGroup);
         }
       }
 
@@ -472,7 +460,7 @@ export default class GameScene extends Phaser.Scene {
         if (this.sasukePool.getLength()) {
           sasuke = this.sasukePool.getFirst();
           sasuke.x = posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth);
-          sasuke.y = posY - 30;
+          sasuke.y = posY - 100;
           sasuke.alpha = 1;
           sasuke.active = true;
           sasuke.visible = true;
@@ -480,17 +468,21 @@ export default class GameScene extends Phaser.Scene {
         } else {
           sasuke = this.physics.add.sprite(
             posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth),
-            posY - 48,
+            posY - 100,
             "sasuke"
           );
-          sasuke.setImmovable(true);
-          sasuke.setVelocityX(platform.body.velocity.x);
+
           // sasuke.setSize(8, 2);
           sasuke.setScale(1.15);
           sasuke.setDepth(5);
           sasuke.setFlipX(true);
+          sasuke.setOrigin(0.5);
           this.sasukeGroup.add(sasuke);
           sasuke.anims.play("sasukestanding");
+          sasuke.setGravityY(500);
+          sasuke.setVelocityX(0);
+          sasuke.setPushable(true);
+          this.physics.add.collider(this.sasukeGroup, this.platformGroup);
         }
       }
 
@@ -498,26 +490,30 @@ export default class GameScene extends Phaser.Scene {
       if (Phaser.Math.Between(1, 100) <= gameOptions.sasukefirePercent) {
         if (this.sasukefirePool.getLength()) {
           sasukefire = this.sasukefirePool.getFirst();
-          sasukefire.x = posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth);
-          sasukefire.y = posY - 30;
+          sasukefire.x = posX - platformWidth / 2 + Phaser.Math.Between(10, platformWidth - 10);
+          sasukefire.y = posY - 100;
           sasukefire.alpha = 1;
           sasukefire.active = true;
           sasukefire.visible = true;
           this.sasukefirePool.remove(sasukefire);
         } else {
           sasukefire = this.physics.add.sprite(
-            posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth),
-            posY - 42,
+            posX - platformWidth / 2 + Phaser.Math.Between(10, platformWidth - 10),
+            posY - 100,
             "sasukefire"
           );
-          sasukefire.setImmovable(true);
-          sasukefire.setVelocityX(platform.body.velocity.x);
           // sasukefire.setSize(40, 45);
           sasukefire.setScale(1.5);
           sasukefire.setDepth(5);
           sasukefire.setFlipX(true);
+          sasukefire.setSize(75, 40);
+          sasukefire.setOrigin(0.5);
           this.sasukefireGroup.add(sasukefire);
           sasukefire.anims.play("sasukefire");
+          sasukefire.setGravityY(500);
+          sasukefire.setVelocityX(0);
+          sasukefire.setPushable(true);
+          this.physics.add.collider(this.sasukefireGroup, this.platformGroup);
         }
       }
     }
@@ -538,11 +534,13 @@ export default class GameScene extends Phaser.Scene {
       }
       this.player.setVelocityY(gameOptions.jumpForce * -1);
       this.playerJumps++;
-      this.player.anims.play("jump");
+      this.player.anims.play(this.characterJumpKey);
       this.player.anims.stop();
 
-      if (this.playerJumps === 2) {
-        this.player.anims.play("doublejump");
+      if (this.doubleJump) {
+        if (this.playerJumps === 2) {
+          this.player.anims.play("doublejump");
+        }
       }
     }
   }
