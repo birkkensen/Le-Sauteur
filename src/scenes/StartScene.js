@@ -38,25 +38,30 @@ export default class StartScene extends Phaser.Scene {
     this.load.image("healthbar1", "./assets/healthAndCoins/health1.png");
     this.load.image("healthbar2", "./assets/healthAndCoins/health2.png");
     this.load.image("healthbar3", "./assets/healthAndCoins/health3.png");
-    this.load.spritesheet("sasuke", "./assets/sasukesprite.png", { frameWidth: 34, frameHeight:55 });
-    this.load.spritesheet("sasukefire", "./assets/sasukefirefire.png", { frameWidth: 148, frameHeight:66 });
+    this.load.spritesheet("sasuke", "./assets/obstacles/sasukesprite.png", {
+      frameWidth: 34,
+      frameHeight: 55,
+    });
+    this.load.spritesheet("sasukefire", "./assets/obstacles/sasukefirefire.png", {
+      frameWidth: 148,
+      frameHeight: 66,
+    });
 
     // * ======= Players ======== * //
     this.load.spritesheet(THE_DUDE_PLAYER, "./assets/players/thePlayer.png", {
       frameWidth: 96,
       frameHeight: 128,
     });
-    this.load.spritesheet("naruto", "./assets/narutosprite.png", { 
-      frameWidth: 63.333, 
+    this.load.spritesheet("naruto", "./assets/players/narutosprite.png", {
+      frameWidth: 63.333,
       frameHeight: 59,
-    }); 
+    });
 
     // * ======= Coins ======== * //
     this.load.spritesheet("coins", "./assets/healthAndCoins/coins.png", {
       frameWidth: 32,
       frameHeight: 32,
     });
-
   }
 
   create() {

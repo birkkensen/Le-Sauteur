@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import config from "../main.js";
 
-let game, timerText, ball, sasuke, sasukefire, healthbar1, healthbar2, healthbar3;
+let game, ball, sasuke, sasukefire, healthbar1, healthbar2, healthbar3;
 let score = 0;
 let healthCounter = 3;
 let overlapTriggered = false;
@@ -53,7 +53,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-
     this.center = {
       x: this.physics.world.bounds.width / 2,
       y: this.physics.world.bounds.height / 2,
@@ -81,7 +80,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.anims.create({
       key: "jump",
-      frames: [{ key: "naruto", frame: 7}],
+      frames: [{ key: "naruto", frame: 7 }],
     });
 
     this.anims.create({
@@ -90,9 +89,9 @@ export default class GameScene extends Phaser.Scene {
         start: 8,
         end: 11,
       }),
-      frameRate:14,
-      repeat:0,
-    })
+      frameRate: 14,
+      repeat: 0,
+    });
 
     this.anims.create({
       key: "rotate",
@@ -103,9 +102,9 @@ export default class GameScene extends Phaser.Scene {
       frameRate: 15,
       repeat: -1,
     });
-    
+
     this.anims.create({
-      key:"sasukestanding",
+      key: "sasukestanding",
       frames: this.anims.generateFrameNumbers("sasuke", {
         start: 0,
         end: 3,
@@ -129,13 +128,13 @@ export default class GameScene extends Phaser.Scene {
     healthbar1 = this.add.image(this.center.x * 2 - 140, 20, "healthbar1").setVisible(false);
 
     this.anims.create({
-      key:"sasukefire",
+      key: "sasukefire",
       frames: this.anims.generateFrameNumbers("sasukefire", {
         start: 0,
         end: 8,
       }),
       frameRate: 12,
-      repeat:-1,
+      repeat: -1,
     });
     // * ======= Groups & Pools ======== * //
     // group with all active platforms.
@@ -195,7 +194,7 @@ export default class GameScene extends Phaser.Scene {
       gameOptions.playerStartPosition,
       game.config.height * 0.5,
       this.character
-
+    );
 
     //group all active sasuke
     this.sasukeGroup = this.add.group({
@@ -249,8 +248,7 @@ export default class GameScene extends Phaser.Scene {
     this.player.setGravityY(gameOptions.playerGravity);
     this.player.setDepth(5);
     this.player.setScale(1.3);
-    this.player.setBodySize(47,47);
-
+    this.player.setBodySize(47, 47);
 
     this.playerLanding = this.sound.add("landing", { volume: 0.2 });
     this.playerJumps = 0;
@@ -384,9 +382,7 @@ export default class GameScene extends Phaser.Scene {
       color: "#FFF",
       fontFamily: "Arcade",
     });
-
   }
-
   // * ======= Methods ======== * //
 
   // the core of the script: platform are added from the pool or created on the fly
@@ -492,9 +488,9 @@ export default class GameScene extends Phaser.Scene {
           // sasuke.setSize(8, 2);
           sasuke.setScale(1.15);
           sasuke.setDepth(5);
-          sasuke.setFlipX(true)
+          sasuke.setFlipX(true);
           this.sasukeGroup.add(sasuke);
-          sasuke.anims.play('sasukestanding')
+          sasuke.anims.play("sasukestanding");
         }
       }
 
@@ -519,9 +515,9 @@ export default class GameScene extends Phaser.Scene {
           // sasukefire.setSize(40, 45);
           sasukefire.setScale(1.5);
           sasukefire.setDepth(5);
-          sasukefire.setFlipX(true)
+          sasukefire.setFlipX(true);
           this.sasukefireGroup.add(sasukefire);
-          sasukefire.anims.play('sasukefire')
+          sasukefire.anims.play("sasukefire");
         }
       }
     }
@@ -545,14 +541,14 @@ export default class GameScene extends Phaser.Scene {
       this.player.anims.play("jump");
       this.player.anims.stop();
 
-      if(this.playerJumps === 2) {
-        this.player.anims.play("doublejump"); 
+      if (this.playerJumps === 2) {
+        this.player.anims.play("doublejump");
       }
     }
   }
 
   // level1() {
-  //   this.anims.stop("background"); 
+  //   this.anims.stop("background");
   // }
 
   update() {
@@ -608,49 +604,48 @@ export default class GameScene extends Phaser.Scene {
 
     /// * ======= New Coins ======== * //
     this.coinGroup.getChildren().forEach((coin) => {
+      //creating levels
+      // if(score === 2) {
+      //   this.level1();
 
-    //creating levels
-    // if(score === 2) {
-    //   this.level1();
-      
-    // }
+      // }
 
+      // adding new coins
+      this.coinGroup.getChildren().forEach(function (coin) {
+        // @ts-ignore
+        if (coin.x < -coin.displayWidth / 2) {
+          this.coinGroup.killAndHide(coin);
+          this.coinGroup.remove(coin);
+        }
+      }, this);
 
-    // adding new coins
-    this.coinGroup.getChildren().forEach(function (coin) {
-      // @ts-ignore
-      if (coin.x < -coin.displayWidth / 2) {
-        this.coinGroup.killAndHide(coin);
-        this.coinGroup.remove(coin);
-      }
-    }, this);
+      // * ======= New Balls ======== * //
+      this.ballGroup.getChildren().forEach((ball) => {
+        // @ts-ignore
+        if (ball.x < -ball.displayWidth / 2) {
+          this.ballGroup.killAndHide(ball);
+          this.ballGroup.remove(ball);
+        }
+      }, this);
 
-    // * ======= New Balls ======== * //
-    this.ballGroup.getChildren().forEach((ball) => {
-      // @ts-ignore
-      if (ball.x < -ball.displayWidth / 2) {
-        this.ballGroup.killAndHide(ball);
-        this.ballGroup.remove(ball);
-      }
-    }, this);
+      // adding new sasukes
+      this.sasukeGroup.getChildren().forEach(function (sasuke) {
+        // @ts-ignore
+        if (sasuke.x < -sasuke.displayWidth / 2) {
+          this.sasukeGroup.killAndHide(sasuke);
+          this.sasukeGroup.remove(sasuke);
+        }
+      }, this);
 
-    // adding new sasukes
-    this.sasukeGroup.getChildren().forEach(function (sasuke) {
-      // @ts-ignore
-      if (sasuke.x < -sasuke.displayWidth / 2) {
-        this.sasukeGroup.killAndHide(sasuke);
-        this.sasukeGroup.remove(sasuke);
-      }
-    }, this);
-
-    // adding new sasukefires
-    this.sasukefireGroup.getChildren().forEach(function (sasukefire) {
-      // @ts-ignore
-      if (sasukefire.x < -sasukefire.displayWidth / 2) {
-        this.sasukefireGroup.killAndHide(sasukefire);
-        this.sasukefireGroup.remove(sasukefire);
-      }
-    }, this);
+      // adding new sasukefires
+      this.sasukefireGroup.getChildren().forEach(function (sasukefire) {
+        // @ts-ignore
+        if (sasukefire.x < -sasukefire.displayWidth / 2) {
+          this.sasukefireGroup.killAndHide(sasukefire);
+          this.sasukefireGroup.remove(sasukefire);
+        }
+      }, this);
+    });
   }
 
   checkHealth() {
