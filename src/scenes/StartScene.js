@@ -3,7 +3,7 @@ import { TextButton } from "../utils/TextButton.js";
 
 // TODO: Add the naruto-player and the player_three
 const NARUTO_PLAYER = "naruto";
-const PLAYER_THREE = ":)";
+const BACKPACK_GIRL = "backpack-girl";
 const THE_DUDE_PLAYER = "dude";
 const SCARY_BG = "scary-background";
 const REGULAR_BG = "regular-background";
@@ -54,6 +54,10 @@ export default class StartScene extends Phaser.Scene {
     });
     this.load.spritesheet(NARUTO_PLAYER, "./assets/players/narutosprite.png", {
       frameWidth: 63.333,
+      frameHeight: 59,
+    });
+    this.load.spritesheet(BACKPACK_GIRL, "./assets/players/runningGirl.png", {
+      frameWidth: 59,
       frameHeight: 59,
     });
 
@@ -135,14 +139,22 @@ export default class StartScene extends Phaser.Scene {
         )
     ).setOrigin(0.5, 0);
     this.add.existing(this.playerTwo);
-    // ! ======= Not working - see line 4 ======== ! //
     this.playerThree = new TextButton(
       this,
       this.center.x,
       this.playerText.y + offsetY,
       "player?",
       { fontFamily: "Arcade", fontSize: "20px", color: color },
-      () => this.choosenPlayer(PLAYER_THREE)
+      () =>
+        this.choosenPlayer(
+          BACKPACK_GIRL,
+          BACKPACK_GIRL + "-key",
+          5,
+          false,
+          BACKPACK_GIRL + "-run",
+          0,
+          9
+        )
     ).setOrigin(0.5, 0);
     this.add.existing(this.playerThree);
 
