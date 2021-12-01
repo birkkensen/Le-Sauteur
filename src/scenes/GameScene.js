@@ -1,14 +1,11 @@
 import Phaser from "phaser";
 import config from "../main.js";
+
 let game, timerText, ball, sasuke, sasukefire, healthbar1, healthbar2, healthbar3;
 let score = 0;
 let healthCounter = 3;
-var overlapTriggered = false;
-window.onload = function () {
-  game = new Phaser.Game(config);
-};
-
-// let gamePoints = 0;
+let overlapTriggered = false;
+window.onload = () => (game = new Phaser.Game(config));
 
 let gameOptions = {
   platformSpeedRange: [300, 300], //speed range in px/sec
@@ -28,25 +25,39 @@ let gameOptions = {
   sasukefirePercent: 50, // % of probability of sasuke spitting fire appearing
 };
 
-class GameScene extends Phaser.Scene {
+export default class GameScene extends Phaser.Scene {
   constructor() {
     super({
       key: "GameScene",
     });
   }
 
+  init(data) {
+    this.character = data.player;
+    this.background = data.background;
+    this.backgroundKey = data.backgroundKey;
+    this.center = data.center;
+    this.fullScreen = data.fullScreen;
+    this.platformKey = data.platformKey;
+    this.framesEnd = data.frames;
+  }
+
+  preload() {
+    if (this.background === "scary-background") {
+      this.load.image(this.platformKey, "./assets/platforms/lava-platform.png");
+    } else if (this.background === "regular-background") {
+      this.load.image(this.platformKey, "./assets/platforms/grass-platform.png");
+    } else if (this.background === "mortal-background") {
+      this.load.image(this.platformKey, "./assets/platforms/snow-platform.png");
+    }
+  }
+
   create() {
+
     this.center = {
       x: this.physics.world.bounds.width / 2,
       y: this.physics.world.bounds.height / 2,
     };
-    this.addBackground();
-    healthbar3 = this.add.image(this.center.x * 2 - 140, 20, "healthbar3");
-    healthbar2 = this.add.image(this.center.x * 2 - 140, 20, "healthbar2");
-    healthbar1 = this.add.image(this.center.x * 2 - 140, 20, "healthbar1");
-    healthbar2.visible = false;
-    healthbar1.visible = false;
-    healthbar3.visible = false;
     // this.checkhealth();
     // setting player animation
     // this.anims.create({
@@ -58,7 +69,6 @@ class GameScene extends Phaser.Scene {
     //   frameRate: 8,
     //   repeat: -1,
     // });
-
     this.anims.create({
       key: "run",
       frames: this.anims.generateFrameNumbers("naruto", {
@@ -88,7 +98,7 @@ class GameScene extends Phaser.Scene {
       key: "rotate",
       frames: this.anims.generateFrameNumbers("coins", {
         start: 0,
-        end: 7,
+        end: 6,
       }),
       frameRate: 15,
       repeat: -1,
@@ -105,6 +115,20 @@ class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
+      key: this.backgroundKey,
+      frames: this.anims.generateFrameNames(this.background, {
+        start: 0,
+        end: 7,
+      }),
+      frameRate: 12,
+      repeat: -1,
+    });
+    this.addBackground();
+    healthbar3 = this.add.image(this.center.x * 2 - 140, 20, "healthbar3").setVisible(false);
+    healthbar2 = this.add.image(this.center.x * 2 - 140, 20, "healthbar2").setVisible(false);
+    healthbar1 = this.add.image(this.center.x * 2 - 140, 20, "healthbar1").setVisible(false);
+
+    this.anims.create({
       key:"sasukefire",
       frames: this.anims.generateFrameNumbers("sasukefire", {
         start: 0,
@@ -113,7 +137,7 @@ class GameScene extends Phaser.Scene {
       frameRate: 12,
       repeat:-1,
     });
-
+    // * ======= Groups & Pools ======== * //
     // group with all active platforms.
     this.platformGroup = this.add.group({
       // once a platform is removed, it's added to the pool
@@ -166,6 +190,12 @@ class GameScene extends Phaser.Scene {
         ball.scene.ballGroup.add(ball);
       },
     });
+    // * ======= Player ======== * //
+    this.player = this.physics.add.sprite(
+      gameOptions.playerStartPosition,
+      game.config.height * 0.5,
+      this.character
+
 
     //group all active sasuke
     this.sasukeGroup = this.add.group({
@@ -222,11 +252,19 @@ class GameScene extends Phaser.Scene {
     this.player.setBodySize(47,47);
 
 
+    this.playerLanding = this.sound.add("landing", { volume: 0.2 });
+    this.playerJumps = 0;
+
+    this.addedPlatforms = 0;
+    this.input.keyboard.on("keydown-SPACE", this.jump, this);
+    this.input.on("pointerdown", this.jump, this);
+
+    // * ======= Colliders / Overlaps ======== * //
     //setting collision between player and coins
     this.physics.add.overlap(
       this.player,
       this.coinGroup,
-      function (player, coin) {
+      (player, coin) => {
         if (overlapTriggered) {
           return;
         }
@@ -240,7 +278,7 @@ class GameScene extends Phaser.Scene {
           duration: 800,
           ease: "Cubic.easeOut",
           callbackScope: this,
-          onComplete: function () {
+          onComplete: () => {
             this.coinGroup.killAndHide(coin);
             this.coinGroup.remove(coin);
             overlapTriggered = false;
@@ -254,9 +292,10 @@ class GameScene extends Phaser.Scene {
     this.physics.add.overlap(
       this.player,
       this.ballGroup,
-      function (player, ball) {
+      (player, ball) => {
         this.ballGroup.killAndHide(ball);
         this.ballGroup.remove(ball);
+        // ball.body.enable = false;
         this.checkHealth();
         healthCounter--;
         this.tweens.add({
@@ -266,12 +305,13 @@ class GameScene extends Phaser.Scene {
           repeat: 3,
           yoyo: true,
           callbackScope: this,
-          onComplete: function () {},
         });
       },
       null,
       this
     );
+
+    // * ======= First platform ======== * //
 
     this.physics.add.overlap(
       this.player,
@@ -323,61 +363,33 @@ class GameScene extends Phaser.Scene {
       game.config.width / 2,
       game.config.height * gameOptions.platformVerticalLimit[1]
     );
-    // the player is not dying
-    (this.dying = false),
-      // checking for input
-      // this.input.on("pointerdown", this.jump, this),
-      // setting collisions between the player and the platform group
-      (this.platformCollider = this.physics.add.collider(
-        this.player,
-        this.platformGroup,
-        function () {
-          // play "run" animation if the player is on a platform
-          if (!this.player.anims.isPlaying) {
-            this.player.anims.play("run");
-          }
-        },
-        null,
-        this
-      ));
+    // setting collisions between the player and the platform group
+    this.platformCollider = this.physics.add.collider(
+      this.player,
+      this.platformGroup,
+      () => {
+        // play "run" animation if the player is on a platform
+        if (!this.player.anims.isPlaying) {
+          this.player.anims.play("run");
+          this.playerLanding.play();
+        }
+      },
+      null,
+      this
+    );
 
     // this.physics.add.collider(player, platform);
-    timerText = this.add.text(10, 10, "Points: 0", {
+    this.displayScore = this.add.text(10, 10, "Points: 0", {
       fontSize: "16px",
-      color: "#000",
+      color: "#FFF",
       fontFamily: "Arcade",
     });
-    // timerText.setOrigin(0.5);
-    //   this.time.addEvent({
-    //     delay: 5000,
-    //     callback: this.updateCounter,
-    //     callbackScope: this,
-    //     loop: true,
-    //   });
+
   }
 
-  addBackground() {
-    this.anims.create({
-      key: "background",
-      frames: this.anims.generateFrameNames("bg", {
-        start: 0,
-        end: 6,
-      }),
-      frameRate: 12,
-      repeat: -1,
-    });
-    this.bg = this.add.sprite(this.center.x, this.center.y, "bg");
-    this.bg.anims.play("background");
-    this.bg.setDisplaySize(this.center.x * 2 + 2, this.center.y * 2 + 2);
-    this.bg.setDepth(4);
-  }
+  // * ======= Methods ======== * //
 
   // the core of the script: platform are added from the pool or created on the fly
-  /**
-   * @param {number} platformWidth
-   * @param {number} posX
-   * @param {number} posY
-   */
   addPlatform(platformWidth, posX, posY) {
     this.addedPlatforms++;
     let platform;
@@ -392,7 +404,7 @@ class GameScene extends Phaser.Scene {
       platform.displayWidth = platformWidth;
       platform.tileScaleX = 1 / platform.scaleX;
     } else {
-      platform = this.add.tileSprite(posX, posY, platformWidth, 32, "platform");
+      platform = this.add.tileSprite(posX, posY, platformWidth, 64, this.platformKey);
       this.physics.add.existing(platform);
       // @ts-ignore
       platform.body.setImmovable(true);
@@ -432,6 +444,7 @@ class GameScene extends Phaser.Scene {
         }
       }
 
+      // * ======= Ball - Obstacle ======== * //
       //if there is a ball over the platform?
       if (Phaser.Math.Between(1, 100) <= gameOptions.ballPercent) {
         if (this.ballPool.getLength()) {
@@ -516,22 +529,19 @@ class GameScene extends Phaser.Scene {
 
   updateScore() {
     score++;
-    timerText.setText("Points: " + score);
+    this.displayScore.setText("Points: " + score);
   }
 
   jump() {
     if (
-      !this.dying &&
-      (this.player.body.touching.down ||
-        (this.playerJumps > 0 && this.playerJumps < gameOptions.jumps))
+      this.player.body.touching.down ||
+      (this.playerJumps > 0 && this.playerJumps < gameOptions.jumps)
     ) {
       if (this.player.body.touching.down) {
         this.playerJumps = 0;
       }
       this.player.setVelocityY(gameOptions.jumpForce * -1);
       this.playerJumps++;
-
-      // stops animation
       this.player.anims.play("jump");
       this.player.anims.stop();
 
@@ -552,7 +562,8 @@ class GameScene extends Phaser.Scene {
     }
     // Keep the player at the same position on the x axis
     this.player.x = gameOptions.playerStartPosition;
-    // recycling platforms
+
+    // * ======= Recycling Platforms / adding new ======== * //
     let minDistance = game.config.width;
     let rightmostPlatformHeight = 0;
     this.platformGroup.getChildren().forEach(function (platform) {
@@ -595,6 +606,9 @@ class GameScene extends Phaser.Scene {
       );
     }
 
+    /// * ======= New Coins ======== * //
+    this.coinGroup.getChildren().forEach((coin) => {
+
     //creating levels
     // if(score === 2) {
     //   this.level1();
@@ -611,8 +625,8 @@ class GameScene extends Phaser.Scene {
       }
     }, this);
 
-    // adding new bowling balls
-    this.ballGroup.getChildren().forEach(function (ball) {
+    // * ======= New Balls ======== * //
+    this.ballGroup.getChildren().forEach((ball) => {
       // @ts-ignore
       if (ball.x < -ball.displayWidth / 2) {
         this.ballGroup.killAndHide(ball);
@@ -640,36 +654,46 @@ class GameScene extends Phaser.Scene {
   }
 
   checkHealth() {
+    if (score % 10 === 0 && score !== 0 && healthCounter !== 3) {
+      healthCounter++;
+    }
     switch (healthCounter) {
       case 3:
-        healthbar3.visible = true;
-        healthbar2.visible = false;
-        healthbar1.visible = false;
+        healthbar3.setVisible(true);
         break;
       case 2:
-        healthbar3.visible = false;
-        healthbar2.visible = true;
-        healthbar1.visible = false;
+        healthbar3.setVisible(false);
+        healthbar2.setVisible(true);
         break;
       case 1:
-        healthbar3.visible = false;
-        healthbar2.visible = false;
-        healthbar1.visible = true;
+        healthbar3.setVisible(false);
+        healthbar2.setVisible(false);
+        healthbar1.setVisible(true);
         break;
       case 0:
         this.gameover();
         break;
     }
   }
+  addBackground() {
+    this.add
+      .sprite(this.center.x, this.center.y, this.background)
+      .setDisplaySize(this.fullScreen.x + 2, this.fullScreen.y + 2)
+      .anims.play(this.backgroundKey);
+  }
 
   gameover() {
-    this.score = JSON.stringify(score);
-    console.log(score);
-    sessionStorage.setItem("Score", this.score);
+    this.finalScore = score;
     score = 0;
     healthCounter = 3;
-    this.scene.start("Gameover");
+    overlapTriggered = false;
+    this.scene.start("Gameover", {
+      score: this.finalScore,
+      center: this.center,
+      fullScreen: this.fullScreen,
+      background: this.background,
+      frames: this.framesEnd,
+      key: this.backgroundKey,
+    });
   }
 }
-
-export default GameScene;
