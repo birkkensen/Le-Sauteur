@@ -27,7 +27,10 @@ export default class StartScene extends Phaser.Scene {
       frameWidth: 640,
       frameHeight: 322,
     });
-    this.load.image("retro-bg", "./assets/backgrounds/retro-bg.webp");
+    this.load.spritesheet("retro-bg", "./assets/backgrounds/startsprite.png", {
+      frameWidth: 952,
+      frameHeight: 416,
+    });
 
     // * ======= Sounds ======== * //
     this.load.audio("landing", "./sounds/groundimpact.mp3");
@@ -75,6 +78,16 @@ export default class StartScene extends Phaser.Scene {
       y: this.physics.world.bounds.height,
     };
 
+    this.anims.create({
+      key: "startsceneBG",
+      frames: this.anims.generateFrameNames("retro-bg", {
+        start: 0,
+        end: 7,
+      }),
+      frameRate: 15,
+      repeat: -1,
+    });
+
     this.addBackground();
     this.backgroundMusic = this.sound.add("bgMusic", { volume: 1 });
 
@@ -88,11 +101,10 @@ export default class StartScene extends Phaser.Scene {
       .setOrigin(0.5, 1);
 
     const offsetY = 75;
-    const offsetX = 200;
+    const offsetX = 300;
     const color = "#fff";
-    this.title.setFill(this.setGradient(this.title));
     this.playerText = this.add
-      .text(this.center.x, this.title.y + 50, "select a player", {
+      .text(this.center.x, this.title.y + 50, "select your player", {
         fontFamily: "Arcade",
         fontSize: "30px",
         color: color,
@@ -147,7 +159,7 @@ export default class StartScene extends Phaser.Scene {
     this.add.existing(this.playerThree);
 
     this.backgroundText = this.add
-      .text(this.center.x, this.playerOne.y + offsetY, "select a background", {
+      .text(this.center.x, this.playerOne.y + offsetY, "select your map", {
         fontFamily: "Arcade",
         fontSize: "30px",
         color: color,
@@ -158,7 +170,7 @@ export default class StartScene extends Phaser.Scene {
       this,
       this.center.x + offsetX,
       this.backgroundText.y + offsetY,
-      "Scary",
+      "Netherrealm",
       { fontFamily: "Arcade", fontSize: "20px", color: color },
       () => this.choosenBg(SCARY_BG, SCARY_BG + "-key", 15, "lava")
     ).setOrigin(0.5, 0);
@@ -168,7 +180,7 @@ export default class StartScene extends Phaser.Scene {
       this,
       this.center.x - offsetX,
       this.backgroundText.y + offsetY,
-      "Regular",
+      "Living Forest",
       { fontFamily: "Arcade", fontSize: "20px", color: color },
       () => this.choosenBg(REGULAR_BG, REGULAR_BG + "-key", 7, "grass")
     ).setOrigin(0.5, 0);
@@ -178,7 +190,7 @@ export default class StartScene extends Phaser.Scene {
       this,
       this.center.x,
       this.backgroundText.y + offsetY,
-      "Mortal",
+      "Kahn's Arena",
       { fontFamily: "Arcade", fontSize: "20px", color: color },
       () => this.choosenBg(MORTAL_BG, MORTAL_BG + "-key", 7, "snow")
     ).setOrigin(0.5, 0);
@@ -269,16 +281,11 @@ export default class StartScene extends Phaser.Scene {
       fullScreen: this.fullScreen,
     });
   }
-  // ? ======= Could probaly remove setGradient method ======== ? //
-  setGradient(text) {
-    let gradient = text.context.createLinearGradient(0, 0, 0, text.height);
-    gradient.addColorStop(0, "#fff");
-    gradient.addColorStop(1, "#fff");
-    return gradient;
-  }
+
   addBackground() {
     this.add
       .sprite(this.center.x, this.center.y, "retro-bg")
-      .setDisplaySize(this.fullScreen.x, this.fullScreen.y);
+      .setDisplaySize(this.fullScreen.x, this.fullScreen.y)
+      .anims.play("startsceneBG"); 
   }
 }
