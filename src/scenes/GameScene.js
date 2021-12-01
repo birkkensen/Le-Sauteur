@@ -11,7 +11,7 @@ let gameOptions = {
   platformSpeedRange: [300, 300], //speed range in px/sec
   backgroundSpeed: 80, //backgroundspeed in px/sec
   platformSpawnRange: [80, 300], //how far should the next be platform from the right edge, before next platform spawns, in px
-  platformSizeRange: [150, 300], //platform width range in px
+  platformSizeRange: [200, 400], //platform width range in px
   platformHeightRange: [-5, 5], //height range between rightmost platform and next platform to be spawned
   platformHeightScale: 20, //scale to be multiplied by platformHeightRange
   playerGravity: 1200,
@@ -49,13 +49,9 @@ export default class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    if (this.background === "scary-background") {
-      this.load.image(this.platformKey, "./assets/platforms/lava-platform.png");
-    } else if (this.background === "regular-background") {
-      this.load.image(this.platformKey, "./assets/platforms/grass-platform.png");
-    } else if (this.background === "mortal-background") {
-      this.load.image(this.platformKey, "./assets/platforms/snow-platform.png");
-    }
+    this.load.image("snow", `./assets/platforms/snow-platform.png`);
+    this.load.image("lava", `./assets/platforms/lava-platform.png`);
+    this.load.image("grass", `./assets/platforms/grass-platform.png`);
   }
 
   create() {
@@ -71,7 +67,7 @@ export default class GameScene extends Phaser.Scene {
         start: this.runningFrameStart,
         end: this.runningFrameEnd,
       }),
-      frameRate: 8,
+      frameRate: 16,
       repeat: -1,
     });
 
@@ -233,10 +229,10 @@ export default class GameScene extends Phaser.Scene {
     );
     this.player.setGravityY(gameOptions.playerGravity);
     this.player.setDepth(5);
-    // this.player.setScale(1.3);
-    // this.player.setBodySize(47, 47);
+    this.player.setScale(1.3);
+    this.player.setBodySize(47, 59);
 
-    this.playerLanding = this.sound.add("landing", { volume: 0.2 });
+    this.playerLanding = this.sound.add("landing", { volume: 0 });
     this.playerJumps = 0;
 
     this.addedPlatforms = 0;
@@ -279,7 +275,6 @@ export default class GameScene extends Phaser.Scene {
       (player, ball) => {
         this.ballGroup.killAndHide(ball);
         this.ballGroup.remove(ball);
-        // ball.body.enable = false;
         this.checkHealth();
         healthCounter--;
         this.tweens.add({
@@ -294,8 +289,6 @@ export default class GameScene extends Phaser.Scene {
       null,
       this
     );
-
-    // * ======= First platform ======== * //
 
     this.physics.add.overlap(
       this.player,
@@ -312,7 +305,6 @@ export default class GameScene extends Phaser.Scene {
           repeat: 3,
           yoyo: true,
           callbackScope: this,
-          onComplete: function () {},
         });
       },
       null,
@@ -334,13 +326,13 @@ export default class GameScene extends Phaser.Scene {
           repeat: 3,
           yoyo: true,
           callbackScope: this,
-          onComplete: function () {},
         });
       },
       null,
       this
     );
 
+    // * ======= First platform ======== * //
     // adding a platform to the game, the arguments are platform width, x position and y position
     this.addPlatform(
       game.config.width,
@@ -348,7 +340,7 @@ export default class GameScene extends Phaser.Scene {
       game.config.height * gameOptions.platformVerticalLimit[1]
     );
     // setting collisions between the player and the platform group
-    this.platformCollider = this.physics.add.collider(
+    this.physics.add.collider(
       this.player,
       this.platformGroup,
       () => {
@@ -362,7 +354,6 @@ export default class GameScene extends Phaser.Scene {
       this
     );
 
-    // this.physics.add.collider(player, platform);
     this.displayScore = this.add.text(10, 10, "Points: 0", {
       fontSize: "16px",
       color: "#FFF",
@@ -377,7 +368,6 @@ export default class GameScene extends Phaser.Scene {
     let platform;
     if (this.platformPool.getLength()) {
       platform = this.platformPool.getFirst();
-
       platform.x = posX;
       platform.y = posY;
       platform.active = true;
@@ -416,7 +406,7 @@ export default class GameScene extends Phaser.Scene {
           coin.visible = true;
           this.coinPool.remove(coin);
         } else {
-          let coin = this.physics.add.sprite(posX, posY - 93, "coins");
+          let coin = this.physics.add.sprite(posX, posY - 80, "coins");
           coin.setImmovable(true);
           coin.setVelocityX(platform.body.velocity.x);
           // coin.anims.play("rotate");
@@ -428,39 +418,40 @@ export default class GameScene extends Phaser.Scene {
 
       // * ======= Ball - Obstacle ======== * //
       //if there is a ball over the platform?
-      if (Phaser.Math.Between(1, 100) <= gameOptions.ballPercent) {
+      if (Phaser.Math.Between(1, 100) <= gameOptions.ballPercent && platformWidth <= 300) {
         if (this.ballPool.getLength()) {
           ball = this.ballPool.getFirst();
-          ball.x = posX - platformWidth / 2 + Phaser.Math.Between(10, platformWidth - 10);
-          ball.y = posY - 100;
+          ball.x = posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth);
+          ball.y = posY - platform.height / 2;
           ball.alpha = 1;
           ball.active = true;
           ball.visible = true;
           this.ballPool.remove(ball);
         } else {
           ball = this.physics.add.sprite(
-            posX - platformWidth / 2 + Phaser.Math.Between(10, platformWidth - 10),
-            posY - 100,
+            posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth),
+            posY - platform.height / 2,
             "ball"
           );
-          // ball.setSize(8, 2);
           ball.setScale(0.15);
           ball.setDepth(5);
-          ball.setOrigin(0.5);
+          ball.setOrigin(0.5, 1);
+          ball.setImmovable(true);
+          ball.setVelocityX(platform.body.velocity.x);
           this.ballGroup.add(ball);
-          ball.setGravityY(500);
-          ball.setVelocityX(0);
-          ball.setPushable(true);
-          this.physics.add.collider(this.ballGroup, this.platformGroup);
         }
       }
 
       //if there is a sasuke over the platform?
-      if (Phaser.Math.Between(1, 100) <= gameOptions.sasukePercent) {
+      if (
+        Phaser.Math.Between(1, 100) <= gameOptions.sasukePercent &&
+        platformWidth >= 250 &&
+        platformWidth <= 350
+      ) {
         if (this.sasukePool.getLength()) {
           sasuke = this.sasukePool.getFirst();
           sasuke.x = posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth);
-          sasuke.y = posY - 100;
+          sasuke.y = posY - platform.height / 2;
           sasuke.alpha = 1;
           sasuke.active = true;
           sasuke.visible = true;
@@ -468,7 +459,7 @@ export default class GameScene extends Phaser.Scene {
         } else {
           sasuke = this.physics.add.sprite(
             posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth),
-            posY - 100,
+            posY - platform.height / 2,
             "sasuke"
           );
 
@@ -476,30 +467,28 @@ export default class GameScene extends Phaser.Scene {
           sasuke.setScale(1.15);
           sasuke.setDepth(5);
           sasuke.setFlipX(true);
-          sasuke.setOrigin(0.5);
+          sasuke.setOrigin(0.5, 1);
           this.sasukeGroup.add(sasuke);
           sasuke.anims.play("sasukestanding");
-          sasuke.setGravityY(500);
-          sasuke.setVelocityX(0);
-          sasuke.setPushable(true);
-          this.physics.add.collider(this.sasukeGroup, this.platformGroup);
+          sasuke.setVelocityX(platform.body.velocity.x);
+          sasuke.setImmovable(false);
         }
       }
 
       //if there is a sasukefire over the platform?
-      if (Phaser.Math.Between(1, 100) <= gameOptions.sasukefirePercent && platformWidth > 250) {
+      if (Phaser.Math.Between(1, 100) <= gameOptions.sasukefirePercent && platformWidth >= 350) {
         if (this.sasukefirePool.getLength()) {
           sasukefire = this.sasukefirePool.getFirst();
-          sasukefire.x = posX - platformWidth / 2 + Phaser.Math.Between(10, platformWidth - 10);
-          sasukefire.y = posY - 100;
+          sasukefire.x = posX - platformWidth / 2;
+          sasukefire.y = posY - platform.height / 2;
           sasukefire.alpha = 1;
           sasukefire.active = true;
           sasukefire.visible = true;
           this.sasukefirePool.remove(sasukefire);
         } else {
           sasukefire = this.physics.add.sprite(
-            posX - platformWidth / 2 + Phaser.Math.Between(10, platformWidth - 10),
-            posY - 100,
+            posX - platformWidth / 2,
+            posY - platform.height / 2,
             "sasukefire"
           );
           // sasukefire.setSize(40, 45);
@@ -507,13 +496,11 @@ export default class GameScene extends Phaser.Scene {
           sasukefire.setDepth(5);
           sasukefire.setFlipX(true);
           sasukefire.setSize(75, 40);
-          sasukefire.setOrigin(0.5);
+          sasukefire.setOrigin(0.5, 1);
+          sasukefire.setVelocityX(platform.body.velocity.x);
+          sasukefire.setImmovable(false);
           this.sasukefireGroup.add(sasukefire);
           sasukefire.anims.play("sasukefire");
-          sasukefire.setGravityY(500);
-          sasukefire.setVelocityX(0);
-          sasukefire.setPushable(true);
-          this.physics.add.collider(this.sasukefireGroup, this.platformGroup);
         }
       }
     }
@@ -601,49 +588,40 @@ export default class GameScene extends Phaser.Scene {
     }
 
     /// * ======= New Coins ======== * //
-    this.coinGroup.getChildren().forEach((coin) => {
-      //creating levels
-      // if(score === 2) {
-      //   this.level1();
+    this.coinGroup.getChildren().forEach(function (coin) {
+      // @ts-ignore
+      if (coin.x < -coin.displayWidth / 2) {
+        this.coinGroup.killAndHide(coin);
+        this.coinGroup.remove(coin);
+      }
+    }, this);
 
-      // }
+    // * ======= New Balls ======== * //
+    this.ballGroup.getChildren().forEach((ball) => {
+      // @ts-ignore
+      if (ball.x < -ball.displayWidth / 2) {
+        this.ballGroup.killAndHide(ball);
+        this.ballGroup.remove(ball);
+      }
+    }, this);
 
-      // adding new coins
-      this.coinGroup.getChildren().forEach(function (coin) {
-        // @ts-ignore
-        if (coin.x < -coin.displayWidth / 2) {
-          this.coinGroup.killAndHide(coin);
-          this.coinGroup.remove(coin);
-        }
-      }, this);
+    // adding new sasukes
+    this.sasukeGroup.getChildren().forEach(function (sasuke) {
+      // @ts-ignore
+      if (sasuke.x < -sasuke.displayWidth / 2) {
+        this.sasukeGroup.killAndHide(sasuke);
+        this.sasukeGroup.remove(sasuke);
+      }
+    }, this);
 
-      // * ======= New Balls ======== * //
-      this.ballGroup.getChildren().forEach((ball) => {
-        // @ts-ignore
-        if (ball.x < -ball.displayWidth / 2) {
-          this.ballGroup.killAndHide(ball);
-          this.ballGroup.remove(ball);
-        }
-      }, this);
-
-      // adding new sasukes
-      this.sasukeGroup.getChildren().forEach(function (sasuke) {
-        // @ts-ignore
-        if (sasuke.x < -sasuke.displayWidth / 2) {
-          this.sasukeGroup.killAndHide(sasuke);
-          this.sasukeGroup.remove(sasuke);
-        }
-      }, this);
-
-      // adding new sasukefires
-      this.sasukefireGroup.getChildren().forEach(function (sasukefire) {
-        // @ts-ignore
-        if (sasukefire.x < -sasukefire.displayWidth / 2) {
-          this.sasukefireGroup.killAndHide(sasukefire);
-          this.sasukefireGroup.remove(sasukefire);
-        }
-      }, this);
-    });
+    // adding new sasukefires
+    this.sasukefireGroup.getChildren().forEach(function (sasukefire) {
+      // @ts-ignore
+      if (sasukefire.x < -sasukefire.displayWidth / 2) {
+        this.sasukefireGroup.killAndHide(sasukefire);
+        this.sasukefireGroup.remove(sasukefire);
+      }
+    }, this);
   }
 
   checkHealth() {
