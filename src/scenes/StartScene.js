@@ -98,7 +98,7 @@ export default class StartScene extends Phaser.Scene {
     // * ======= Texts / Buttons ======== * //
     // TODO: When the user press one button, and later change their mind and press another instead - remove the hasChoosenState color from the previous button //
     this.title = this.add
-      .text(this.center.x, this.center.y - 100, "le sauteur", {
+      .text(this.center.x, this.center.y - 250, "le sauteur", {
         fontFamily: "Arcade",
         fontSize: "80px",
       })
@@ -108,7 +108,7 @@ export default class StartScene extends Phaser.Scene {
     const offsetX = 300;
     const color = "#fff";
     this.playerText = this.add
-      .text(this.center.x, this.title.y + 50, "select your player", {
+      .text(this.center.x, this.title.y + 100, "select your player", {
         fontFamily: "Arcade",
         fontSize: "30px",
         color: color,
@@ -155,7 +155,7 @@ export default class StartScene extends Phaser.Scene {
       this,
       this.center.x,
       this.playerText.y + offsetY,
-      "player?",
+      "backpacker",
       { fontFamily: "Arcade", fontSize: "20px", color: color },
       () =>
         this.choosenPlayer(
@@ -211,7 +211,7 @@ export default class StartScene extends Phaser.Scene {
     this.startGameText = new TextButton(
       this,
       this.center.x,
-      this.regularBg.y + offsetY,
+      this.regularBg.y + offsetY + 50,
       "Start Game",
       { fontFamily: "Arcade", fontSize: "25px", color: color },
       () => {
