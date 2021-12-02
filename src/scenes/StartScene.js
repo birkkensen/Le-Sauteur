@@ -193,7 +193,7 @@ export default class StartScene extends Phaser.Scene {
         this.choosenPlayer(
           BACKPACKER_PLAYER,
           BACKPACKER_PLAYER + "-key",
-          5,
+          0,
           false,
           BACKPACKER_PLAYER + "-run",
           0,
