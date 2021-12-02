@@ -76,6 +76,12 @@ export default class Highscore extends Phaser.Scene {
   submitName() {
     this.playerText.destroy();
     this.gameOver.destroy();
+    this.add
+      .text(this.center.x, this.center.y - 200, "High scores", {
+        fontFamily: "Arcade",
+        fontSize: "60px",
+      })
+      .setOrigin();
     this.desc.destroy();
     let highScoredPlayers = JSON.parse(localStorage.getItem("players"));
     highScoredPlayers.sort((a, b) => {
@@ -105,7 +111,7 @@ export default class Highscore extends Phaser.Scene {
       offsetYName += 50;
     }
     this.userHasEnteredName = true;
-    this.add
+    this.backToMenu = this.add
       .text(this.center.x, this.center.y + 250, "Click anywhere on the screen to go back to main", {
         fontFamily: "Arcade",
         color: "#fff",
@@ -113,6 +119,13 @@ export default class Highscore extends Phaser.Scene {
       })
       .setOrigin(0.5)
       .setDepth(2);
+    this.add.tween({
+      targets: this.backToMenu,
+      alpha: 0,
+      duration: 800,
+      yoyo: true,
+      repeat: -1,
+    });
     this.input.on("pointerdown", () => {
       this.scene.start("StartScene");
     });
