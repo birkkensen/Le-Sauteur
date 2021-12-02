@@ -8,7 +8,7 @@ let overlapTriggered = false;
 window.onload = () => (game = new Phaser.Game(config));
 
 let gameOptions = {
-  platformSpeedRange: [300, 300], //speed range in px/sec
+  platformSpeedRange: 500, //speed range in px/sec
   backgroundSpeed: 80, //backgroundspeed in px/sec
   platformSpawnRange: [80, 300], //how far should the next be platform from the right edge, before next platform spawns, in px
   platformSizeRange: [200, 400], //platform width range in px
@@ -49,7 +49,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("snow", `./assets/platforms/snow-platform.png`);
+    this.load.image("snow", `./assets/platforms/purpleplat.png`);
     this.load.image("lava", `./assets/platforms/lava-platform.png`);
     this.load.image("grass", `./assets/platforms/grass-platform.png`);
   }
@@ -382,8 +382,7 @@ export default class GameScene extends Phaser.Scene {
       platform.body.setImmovable(true);
       // @ts-ignore
       platform.body.setVelocityX(
-        Phaser.Math.Between(gameOptions.platformSpeedRange[0], gameOptions.platformSpeedRange[1]) *
-          -1
+        gameOptions.platformSpeedRange * -1
       );
       platform.setDepth(5);
       this.platformGroup.add(platform);
@@ -532,10 +531,6 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  // level1() {
-  //   this.anims.stop("background");
-  // }
-
   update() {
     this.checkHealth();
     if (this.player.y > game.config.height) {
@@ -622,6 +617,8 @@ export default class GameScene extends Phaser.Scene {
         this.sasukefireGroup.remove(sasukefire);
       }
     }, this);
+
+
   }
 
   checkHealth() {
