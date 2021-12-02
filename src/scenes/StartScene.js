@@ -98,15 +98,22 @@ export default class StartScene extends Phaser.Scene {
     // * ======= Texts / Buttons ======== * //
     // TODO: When the user press one button, and later change their mind and press another instead - remove the hasChoosenState color from the previous button //
     this.title = this.add
-      .text(this.center.x, this.center.y - 250, "le sauteur", {
+      .text(this.center.x, this.center.y - 300, "le sauteur", {
         fontFamily: "Arcade",
         fontSize: "80px",
         color: "#FF5733"
       })
       .setOrigin(0.5, 1);
 
-      this.description = this.add
-      .text(this.center.x, this.title.y + 100, "click to jump, doubleclick to doublejump  \n \n Collect coins while avoiding obstacles", {
+      this.add
+      .text(this.center.x, this.title.y + 70, "click to jump, doubleclick to doublejump.  \n \n Collect coins while avoiding obstacles.", {
+        fontFamily: "Arcade",
+        fontSize: "20px",
+      })
+      .setOrigin(0.5, 1);
+
+      this.add
+      .text(this.center.x, this.title.y + 110, "you have 3 lifes, every 10 coins gets you full health.", {
         fontFamily: "Arcade",
         fontSize: "20px",
       })
