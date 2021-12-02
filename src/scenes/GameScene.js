@@ -49,7 +49,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("snow", `./assets/platforms/snow-platform.png`);
+    this.load.image("snow", `./assets/platforms/purpleplat.png`);
     this.load.image("lava", `./assets/platforms/lava-platform.png`);
     this.load.image("grass", `./assets/platforms/grass-platform.png`);
   }
@@ -119,7 +119,7 @@ export default class GameScene extends Phaser.Scene {
       key: "sasukefire",
       frames: this.anims.generateFrameNumbers("sasukefire", {
         start: 0,
-        end: 8,
+        end: 7,
       }),
       frameRate: 12,
       repeat: -1,
@@ -465,7 +465,7 @@ export default class GameScene extends Phaser.Scene {
             posY - platform.height / 2,
             "ball"
           );
-          ball.setScale(0.15);
+          ball.setScale(0.07);
           ball.setDepth(5);
           ball.setOrigin(0.5, 1);
           ball.setImmovable(true);
@@ -522,8 +522,8 @@ export default class GameScene extends Phaser.Scene {
           sasukefire.setScale(1.5);
           sasukefire.setDepth(5);
           sasukefire.setFlipX(true);
-          sasukefire.setSize(75, 40);
-          sasukefire.setOrigin(0.5, 1);
+          sasukefire.setSize(75, 0);
+          sasukefire.setOrigin(0.5, 0.8);
           sasukefire.setVelocityX(platform.body.velocity.x);
           sasukefire.setImmovable(true);
           this.sasukefireGroup.add(sasukefire);
@@ -558,10 +558,6 @@ export default class GameScene extends Phaser.Scene {
       }
     }
   }
-
-  // level1() {
-  //   this.anims.stop("background");
-  // }
 
   update() {
     this.checkHealth();

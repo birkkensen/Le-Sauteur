@@ -40,7 +40,7 @@ export default class StartScene extends Phaser.Scene {
     this.load.audio("bgMusic", "./sounds/background-music.mp3");
 
     // * ======= Obstacles and Health ======== * //
-    this.load.image("ball", "./assets/obstacles/bowling-ball-pixel.png");
+    this.load.image("ball", "./assets/obstacles/greenbowl.png");
     this.load.image("healthbar1", "./assets/healthAndCoins/health1.png");
     this.load.image("healthbar2", "./assets/healthAndCoins/health2.png");
     this.load.image("healthbar3", "./assets/healthAndCoins/health3.png");
@@ -105,20 +105,45 @@ export default class StartScene extends Phaser.Scene {
     // * ======= Texts / Buttons ======== * //
     // TODO: When the user press one button, and later change their mind and press another instead - remove the hasChoosenState color from the previous button //
     this.title = this.add
-      .text(this.center.x, this.center.y - 100, "le sauteur", {
+      .text(this.center.x, this.center.y - 300, "le sauteur", {
         fontFamily: "Arcade",
         fontSize: "80px",
+        color: "#FF5733",
       })
+      .setOrigin(0.5, 1);
+
+    this.add
+      .text(
+        this.center.x,
+        this.title.y + 70,
+        "click to jump, doubleclick to doublejump.  \n \n Collect coins while avoiding obstacles.",
+        {
+          fontFamily: "Arcade",
+          fontSize: "20px",
+        }
+      )
+      .setOrigin(0.5, 1);
+
+    this.add
+      .text(
+        this.center.x,
+        this.title.y + 110,
+        "you have 3 lifes, every 10 coins gets you full health.",
+        {
+          fontFamily: "Arcade",
+          fontSize: "20px",
+        }
+      )
       .setOrigin(0.5, 1);
 
     const offsetY = 75;
     const offsetX = 300;
     const color = "#fff";
     this.playerText = this.add
-      .text(this.center.x, this.title.y + 50, "select your player", {
+      .text(this.center.x, this.title.y + 150, "select your player", {
         fontFamily: "Arcade",
         fontSize: "30px",
-        color: color,
+        color: "#FFA500",
       })
       .setOrigin(0.5, 0);
     this.playerOne = new TextButton(
@@ -181,7 +206,7 @@ export default class StartScene extends Phaser.Scene {
       .text(this.center.x, this.playerOne.y + offsetY, "select your map", {
         fontFamily: "Arcade",
         fontSize: "30px",
-        color: color,
+        color: "#FFA500",
       })
       .setOrigin(0.5, 0);
 
@@ -218,7 +243,7 @@ export default class StartScene extends Phaser.Scene {
     this.startGameText = new TextButton(
       this,
       this.center.x,
-      this.regularBg.y + offsetY,
+      this.regularBg.y + offsetY + 50,
       "Start Game",
       { fontFamily: "Arcade", fontSize: "25px", color: color },
       () => {
