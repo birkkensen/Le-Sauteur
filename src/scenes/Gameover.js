@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+
 export default class Gameover extends Phaser.Scene {
   constructor() {
     super({ key: "Gameover" });
@@ -26,36 +27,70 @@ export default class Gameover extends Phaser.Scene {
       .setOrigin(0.5);
     this.gameoverText.setFill(this.setGradient(this.gameoverText));
 
-    this.scoreText = this.add
-      .text(
-        this.center.x,
-        this.gameoverText.y + 100,
-        this.finalScore === 1
-          ? `You got ${this.finalScore} point`
-          : `You got ${this.finalScore} points`,
-        {
-          fontFamily: "Arcade",
-          fontSize: "30px",
-        }
-      )
-      .setOrigin(0.5);
-    this.scoreText.setFill(this.setGradient(this.scoreText));
-
-    this.returnText = this.add
-      .text(this.center.x, this.scoreText.y + 70, "Press space to return to the main", {
-        fontFamily: "Arcade",
-        fontSize: "30px",
-      })
-      .setOrigin(0.5);
-    this.returnText.setFill(this.setGradient(this.returnText));
-    this.tweens.add({
-      targets: this.returnText,
-      alpha: 0,
-      duration: 800,
-      ease: "Cubic.easeInOut",
-      yoyo: true,
-      repeat: -1,
+    let highScoredPlayers = JSON.parse(localStorage.getItem("players"));
+    highScoredPlayers.sort((a, b) => {
+      return b.score - a.score;
     });
+    // let offsetYPosition = 100;
+    // for (let i = 0; i < highScoredPlayers.length && i < 5; i++) {
+    //   this.add
+    //     .text(this.center.x - 150, this.gameoverText.y + offsetYPosition, `${i + 1}.`, {
+    //       fontFamily: "Arcade",
+    //       fontSize: "30px",
+    //     })
+    //     .setOrigin(0.5);
+    //   offsetYPosition += 50;
+    // }
+    let offsetYName = 100;
+    for (let i = 0; i < highScoredPlayers.length && i < 5; i++) {
+      this.add
+        .text(
+          this.center.x,
+          this.gameoverText.y + offsetYName,
+          this.finalScore === 1
+            ? `${i + 1}. ${highScoredPlayers[i].player}`
+            : `${i + 1}. ${highScoredPlayers[i].player}`,
+          {
+            fontFamily: "Arcade",
+            fontSize: "30px",
+          }
+        )
+        .setOrigin(0.5);
+      offsetYName += 50;
+    }
+    let offsetYScore = 100;
+    for (let i = 0; i < highScoredPlayers.length && i < 5; i++) {
+      this.add
+        .text(
+          this.center.x + 200,
+          this.gameoverText.y + offsetYScore,
+          this.finalScore === 1 ? `${highScoredPlayers[i].score}` : `${highScoredPlayers[i].score}`,
+          {
+            fontFamily: "Arcade",
+            fontSize: "30px",
+          }
+        )
+        .setOrigin(0.5);
+      offsetYScore += 50;
+    }
+
+    // this.scoreText.setFill(this.setGradient(this.scoreText));
+
+    // this.returnText = this.add
+    //   .text(this.center.x, this.scoreText.y + 70, "Press space to return to the main", {
+    //     fontFamily: "Arcade",
+    //     fontSize: "30px",
+    //   })
+    //   .setOrigin(0.5);
+    // this.returnText.setFill(this.setGradient(this.returnText));
+    // this.tweens.add({
+    //   targets: this.returnText,
+    //   alpha: 0,
+    //   duration: 800,
+    //   ease: "Cubic.easeInOut",
+    //   yoyo: true,
+    //   repeat: -1,
+    // });
 
     // * ======= Back to the main menu ======== * //
     this.input.keyboard.once("keydown-" + "SPACE", () => {

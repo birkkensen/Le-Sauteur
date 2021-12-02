@@ -3,11 +3,14 @@ import { TextButton } from "../utils/TextButton.js";
 
 // TODO: Add the naruto-player and the player_three
 const NARUTO_PLAYER = "naruto";
-const BACKPACK_GIRL = "backpack-girl";
+const BACKPACKER_PLAYER = "backpacker";
 const THE_DUDE_PLAYER = "dude";
 const SCARY_BG = "scary-background";
 const REGULAR_BG = "regular-background";
 const MORTAL_BG = "mortal-background";
+sessionStorage.setItem("musicIsPlaying", "false");
+let backgroundMusic;
+let musicBtn;
 export default class StartScene extends Phaser.Scene {
   constructor() {
     super({ key: "StartScene" });
@@ -34,7 +37,7 @@ export default class StartScene extends Phaser.Scene {
 
     // * ======= Sounds ======== * //
     this.load.audio("landing", "./sounds/groundimpact.mp3");
-    this.load.audio("bgMusic", "./sounds/bg-music.mp3");
+    this.load.audio("bgMusic", "./sounds/background-music.mp3");
 
     // * ======= Obstacles and Health ======== * //
     this.load.image("ball", "./assets/obstacles/bowling-ball-pixel.png");
@@ -46,8 +49,8 @@ export default class StartScene extends Phaser.Scene {
       frameHeight: 55,
     });
     this.load.spritesheet("sasukefire", "./assets/obstacles/sasukefirefire.png", {
-      frameWidth: 148,
-      frameHeight: 66,
+      frameWidth: 147.7,
+      frameHeight: 53,
     });
 
     // * ======= Players ======== * //
@@ -59,7 +62,7 @@ export default class StartScene extends Phaser.Scene {
       frameWidth: 63.333,
       frameHeight: 59,
     });
-    this.load.spritesheet(BACKPACK_GIRL, "./assets/players/runningGirl.png", {
+    this.load.spritesheet(BACKPACKER_PLAYER, "./assets/players/runningGirl.png", {
       frameWidth: 59,
       frameHeight: 59,
     });
@@ -68,6 +71,10 @@ export default class StartScene extends Phaser.Scene {
     this.load.spritesheet("coins", "./assets/healthAndCoins/coins.png", {
       frameWidth: 32,
       frameHeight: 32,
+    });
+    this.load.spritesheet("white-russian", "./assets/healthAndCoins/whiteRussian.png", {
+      frameWidth: 64,
+      frameHeight: 64,
     });
   }
 
@@ -93,7 +100,7 @@ export default class StartScene extends Phaser.Scene {
     });
 
     this.addBackground();
-    this.backgroundMusic = this.sound.add("bgMusic", { volume: 1 });
+    backgroundMusic = this.sound.add("bgMusic", { volume: 1 });
 
     // * ======= Texts / Buttons ======== * //
     // TODO: When the user press one button, and later change their mind and press another instead - remove the hasChoosenState color from the previous button //
@@ -155,15 +162,15 @@ export default class StartScene extends Phaser.Scene {
       this,
       this.center.x,
       this.playerText.y + offsetY,
-      "player?",
+      "Backpacker",
       { fontFamily: "Arcade", fontSize: "20px", color: color },
       () =>
         this.choosenPlayer(
-          BACKPACK_GIRL,
-          BACKPACK_GIRL + "-key",
+          BACKPACKER_PLAYER,
+          BACKPACKER_PLAYER + "-key",
           5,
           false,
-          BACKPACK_GIRL + "-run",
+          BACKPACKER_PLAYER + "-run",
           0,
           9
         )
@@ -221,7 +228,7 @@ export default class StartScene extends Phaser.Scene {
     this.add.existing(this.startGameText);
 
     // * ======= Mute or Play ======== * //
-    this.musicBtn = new TextButton(
+    musicBtn = new TextButton(
       this,
       this.center.x * 2 - 50,
       this.center.y * 2 - 50,
@@ -235,17 +242,21 @@ export default class StartScene extends Phaser.Scene {
         this.setMusicState();
       }
     ).setOrigin(1, 1);
-    this.add.existing(this.musicBtn);
+    this.add.existing(musicBtn);
   }
 
   // * ======= Methods ======== * //
   setMusicState() {
-    if (this.backgroundMusic.isPlaying) {
-      this.backgroundMusic.pause();
-      this.musicBtn.setText("Sound Off");
+    let isMusicPlaying = JSON.parse(sessionStorage.getItem("musicIsPlaying"));
+    console.log(isMusicPlaying);
+    if (isMusicPlaying) {
+      backgroundMusic.pause();
+      musicBtn.setText("Sound Off");
+      sessionStorage.setItem("musicIsPlaying", "false");
     } else {
-      this.backgroundMusic.play();
-      this.musicBtn.setText("Sound On");
+      backgroundMusic.play();
+      musicBtn.setText("Sound On");
+      sessionStorage.setItem("musicIsPlaying", "true");
     }
   }
   choosenPlayer(
@@ -298,6 +309,6 @@ export default class StartScene extends Phaser.Scene {
     this.add
       .sprite(this.center.x, this.center.y, "retro-bg")
       .setDisplaySize(this.fullScreen.x, this.fullScreen.y)
-      .anims.play("startsceneBG"); 
+      .anims.play("startsceneBG");
   }
 }

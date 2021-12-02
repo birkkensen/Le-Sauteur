@@ -8,7 +8,7 @@ let overlapTriggered = false;
 window.onload = () => (game = new Phaser.Game(config));
 
 let gameOptions = {
-  platformSpeedRange: [300, 300], //speed range in px/sec
+  platformSpeedRange: 500, //speed range in px/sec
   backgroundSpeed: 80, //backgroundspeed in px/sec
   platformSpawnRange: [80, 300], //how far should the next be platform from the right edge, before next platform spawns, in px
   platformSizeRange: [200, 400], //platform width range in px
@@ -20,8 +20,8 @@ let gameOptions = {
   platformVerticalLimit: [0.4, 0.8],
   playerStartPosition: 200, //x position
   coinPercent: 50, // % of probability of coin appearing
-  ballPercent: 50, // % of probability of spike appearing
-  sasukePercent: 10, // % of probability of sasuke appearing
+  ballPercent: 25, // % of probability of spike appearing
+  sasukePercent: 15, // % of probability of sasuke appearing
   sasukefirePercent: 5, // % of probability of sasuke spitting fire appearing
 };
 
@@ -97,6 +97,16 @@ export default class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
+      key: "bouncingRussian",
+      frames: this.anims.generateFrameNumbers("white-russian", {
+        start: 0,
+        end: 1,
+      }),
+      frameRate: 4,
+      repeat: -1,
+    });
+
+    this.anims.create({
       key: "sasukestanding",
       frames: this.anims.generateFrameNumbers("sasuke", {
         start: 0,
@@ -125,9 +135,21 @@ export default class GameScene extends Phaser.Scene {
       repeat: -1,
     });
     this.addBackground();
-    healthbar3 = this.add.image(this.center.x * 2 - 140, 20, "healthbar3").setVisible(false);
-    healthbar2 = this.add.image(this.center.x * 2 - 140, 20, "healthbar2").setVisible(false);
-    healthbar1 = this.add.image(this.center.x * 2 - 140, 20, "healthbar1").setVisible(false);
+    healthbar3 = this.add
+      .image(this.center.x * 2, 10, "healthbar3")
+      .setVisible(false)
+      .setScale(2)
+      .setOrigin(1, 0);
+    healthbar2 = this.add
+      .image(this.center.x * 2, 10, "healthbar2")
+      .setVisible(false)
+      .setScale(2)
+      .setOrigin(1, 0);
+    healthbar1 = this.add
+      .image(this.center.x * 2, 10, "healthbar1")
+      .setVisible(false)
+      .setScale(2)
+      .setOrigin(1, 0);
 
     // * ======= Groups & Pools ======== * //
     // group with all active platforms.
@@ -284,6 +306,9 @@ export default class GameScene extends Phaser.Scene {
           repeat: 3,
           yoyo: true,
           callbackScope: this,
+          onComplete: () => {
+            this.player.alpha = 1;
+          },
         });
       },
       null,
@@ -305,6 +330,9 @@ export default class GameScene extends Phaser.Scene {
           repeat: 3,
           yoyo: true,
           callbackScope: this,
+          onComplete: () => {
+            this.player.alpha = 1;
+          },
         });
       },
       null,
@@ -326,6 +354,9 @@ export default class GameScene extends Phaser.Scene {
           repeat: 3,
           yoyo: true,
           callbackScope: this,
+          onComplete: () => {
+            this.player.alpha = 1;
+          },
         });
       },
       null,
@@ -354,9 +385,9 @@ export default class GameScene extends Phaser.Scene {
       this
     );
 
-    this.displayScore = this.add.text(10, 10, "Points: 0", {
-      fontSize: "16px",
-      color: "#FFF",
+    this.displayScore = this.add.text(20, 20, "Points: 0", {
+      fontSize: "24px",
+      color: "#FF00F5",
       fontFamily: "Arcade",
     });
   }
@@ -381,10 +412,7 @@ export default class GameScene extends Phaser.Scene {
       // @ts-ignore
       platform.body.setImmovable(true);
       // @ts-ignore
-      platform.body.setVelocityX(
-        Phaser.Math.Between(gameOptions.platformSpeedRange[0], gameOptions.platformSpeedRange[1]) *
-          -1
-      );
+      platform.body.setVelocityX(gameOptions.platformSpeedRange * -1);
       platform.setDepth(5);
       this.platformGroup.add(platform);
     }
@@ -406,11 +434,15 @@ export default class GameScene extends Phaser.Scene {
           coin.visible = true;
           this.coinPool.remove(coin);
         } else {
-          let coin = this.physics.add.sprite(posX, posY - 80, "coins");
+          if (this.character === "dude") {
+            var coin = this.physics.add.sprite(posX, posY - 80, "white-russian");
+            coin.anims.play("bouncingRussian", true);
+          } else {
+            var coin = this.physics.add.sprite(posX, posY - 80, "coins");
+            coin.anims.play("rotate", true);
+          }
           coin.setImmovable(true);
           coin.setVelocityX(platform.body.velocity.x);
-          // coin.anims.play("rotate");
-          coin.anims.play("rotate", true);
           coin.setDepth(5);
           this.coinGroup.add(coin);
         }
@@ -445,8 +477,8 @@ export default class GameScene extends Phaser.Scene {
       //if there is a sasuke over the platform?
       if (
         Phaser.Math.Between(1, 100) <= gameOptions.sasukePercent &&
-        platformWidth >= 250 &&
-        platformWidth <= 350
+        platformWidth > 250 &&
+        platformWidth < 350
       ) {
         if (this.sasukePool.getLength()) {
           sasuke = this.sasukePool.getFirst();
@@ -471,7 +503,7 @@ export default class GameScene extends Phaser.Scene {
           this.sasukeGroup.add(sasuke);
           sasuke.anims.play("sasukestanding");
           sasuke.setVelocityX(platform.body.velocity.x);
-          sasuke.setImmovable(false);
+          sasuke.setImmovable(true);
         }
       }
 
@@ -479,26 +511,21 @@ export default class GameScene extends Phaser.Scene {
       if (Phaser.Math.Between(1, 100) <= gameOptions.sasukefirePercent && platformWidth >= 350) {
         if (this.sasukefirePool.getLength()) {
           sasukefire = this.sasukefirePool.getFirst();
-          sasukefire.x = posX - platformWidth / 2;
+          sasukefire.x = posX;
           sasukefire.y = posY - platform.height / 2;
           sasukefire.alpha = 1;
           sasukefire.active = true;
           sasukefire.visible = true;
           this.sasukefirePool.remove(sasukefire);
         } else {
-          sasukefire = this.physics.add.sprite(
-            posX - platformWidth / 2,
-            posY - platform.height / 2,
-            "sasukefire"
-          );
-          // sasukefire.setSize(40, 45);
+          sasukefire = this.physics.add.sprite(posX, posY - platform.height / 2, "sasukefire");
           sasukefire.setScale(1.5);
           sasukefire.setDepth(5);
           sasukefire.setFlipX(true);
           sasukefire.setSize(75, 40);
           sasukefire.setOrigin(0.5, 1);
           sasukefire.setVelocityX(platform.body.velocity.x);
-          sasukefire.setImmovable(false);
+          sasukefire.setImmovable(true);
           this.sasukefireGroup.add(sasukefire);
           sasukefire.anims.play("sasukefire");
         }
@@ -658,7 +685,8 @@ export default class GameScene extends Phaser.Scene {
     score = 0;
     healthCounter = 3;
     overlapTriggered = false;
-    this.scene.start("Gameover", {
+    // this.getSessionStorage();
+    this.scene.start("Highscore", {
       score: this.finalScore,
       center: this.center,
       fullScreen: this.fullScreen,
@@ -666,5 +694,13 @@ export default class GameScene extends Phaser.Scene {
       frames: this.framesEnd,
       key: this.backgroundKey,
     });
+  }
+
+  getSessionStorage() {
+    let oldPlayers = JSON.parse(localStorage.getItem("players")) || [];
+    let newPlayerAndScore = { score: this.finalScore };
+    oldPlayers.push(newPlayerAndScore);
+    localStorage.setItem("players", JSON.stringify(oldPlayers));
+    console.log(localStorage.getItem("players"));
   }
 }
