@@ -37,7 +37,7 @@ export default class StartScene extends Phaser.Scene {
     this.load.audio("bgMusic", "./sounds/bg-music.mp3");
 
     // * ======= Obstacles and Health ======== * //
-    this.load.image("ball", "./assets/obstacles/bowling-ball-pixel.png");
+    this.load.image("ball", "./assets/obstacles/greenbowl.png");
     this.load.image("healthbar1", "./assets/healthAndCoins/health1.png");
     this.load.image("healthbar2", "./assets/healthAndCoins/health2.png");
     this.load.image("healthbar3", "./assets/healthAndCoins/health3.png");
@@ -45,9 +45,9 @@ export default class StartScene extends Phaser.Scene {
       frameWidth: 34,
       frameHeight: 55,
     });
-    this.load.spritesheet("sasukefire", "./assets/obstacles/sasukefirefire.png", {
-      frameWidth: 148,
-      frameHeight: 66,
+    this.load.spritesheet("sasukefire", "./assets/obstacles/sasukefire.png", {
+      frameWidth: 268.5,
+      frameHeight: 116,
     });
 
     // * ======= Players ======== * //
@@ -101,6 +101,14 @@ export default class StartScene extends Phaser.Scene {
       .text(this.center.x, this.center.y - 250, "le sauteur", {
         fontFamily: "Arcade",
         fontSize: "80px",
+        color: "#FF5733"
+      })
+      .setOrigin(0.5, 1);
+
+      this.description = this.add
+      .text(this.center.x, this.title.y + 100, "click to jump, doubleclick to doublejump  \n \n Collect coins while avoiding obstacles", {
+        fontFamily: "Arcade",
+        fontSize: "20px",
       })
       .setOrigin(0.5, 1);
 
@@ -108,10 +116,10 @@ export default class StartScene extends Phaser.Scene {
     const offsetX = 300;
     const color = "#fff";
     this.playerText = this.add
-      .text(this.center.x, this.title.y + 100, "select your player", {
+      .text(this.center.x, this.title.y + 150, "select your player", {
         fontFamily: "Arcade",
         fontSize: "30px",
-        color: color,
+        color: "#FFA500",
       })
       .setOrigin(0.5, 0);
     this.playerOne = new TextButton(
@@ -174,7 +182,7 @@ export default class StartScene extends Phaser.Scene {
       .text(this.center.x, this.playerOne.y + offsetY, "select your map", {
         fontFamily: "Arcade",
         fontSize: "30px",
-        color: color,
+        color: "#FFA500",
       })
       .setOrigin(0.5, 0);
 
