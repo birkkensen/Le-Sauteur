@@ -128,7 +128,7 @@ export default class StartScene extends Phaser.Scene {
       .text(
         this.center.x,
         this.title.y + 110,
-        "you have 3 lifes, every 10 coins gets you full health.",
+        "you have 3 lives, every 10 coins gets you full health.",
         {
           fontFamily: "Arcade",
           fontSize: "20px",
