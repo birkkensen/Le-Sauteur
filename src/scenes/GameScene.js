@@ -11,7 +11,7 @@ let gameOptions = {
   platformSpeedRange: 500, //speed range in px/sec
   backgroundSpeed: 80, //backgroundspeed in px/sec
   platformSpawnRange: [80, 300], //how far should the next be platform from the right edge, before next platform spawns, in px
-  platformSizeRange: [200, 400], //platform width range in px
+  platformSizeRange: [200, 500], //platform width range in px
   platformHeightRange: [-5, 5], //height range between rightmost platform and next platform to be spawned
   platformHeightScale: 20, //scale to be multiplied by platformHeightRange
   playerGravity: 1200,
@@ -22,7 +22,7 @@ let gameOptions = {
   coinPercent: 50, // % of probability of coin appearing
   ballPercent: 25, // % of probability of spike appearing
   sasukePercent: 15, // % of probability of sasuke appearing
-  sasukefirePercent: 5, // % of probability of sasuke spitting fire appearing
+  sasukefirePercent: 100, // % of probability of sasuke spitting fire appearing
 };
 
 export default class GameScene extends Phaser.Scene {
@@ -116,7 +116,7 @@ export default class GameScene extends Phaser.Scene {
       repeat: -1,
     });
     this.anims.create({
-      key: "sasukefire",
+      key: "sasukefireanim",
       frames: this.anims.generateFrameNumbers("sasukefire", {
         start: 0,
         end: 7,
@@ -450,7 +450,7 @@ export default class GameScene extends Phaser.Scene {
 
       // * ======= Ball - Obstacle ======== * //
       //if there is a ball over the platform?
-      if (Phaser.Math.Between(1, 100) <= gameOptions.ballPercent && platformWidth <= 300) {
+      if (Phaser.Math.Between(1, 100) <= gameOptions.ballPercent && platformWidth < 350) {
         if (this.ballPool.getLength()) {
           ball = this.ballPool.getFirst();
           ball.x = posX - platformWidth / 2 + Phaser.Math.Between(1, platformWidth);
@@ -477,8 +477,8 @@ export default class GameScene extends Phaser.Scene {
       //if there is a sasuke over the platform?
       if (
         Phaser.Math.Between(1, 100) <= gameOptions.sasukePercent &&
-        platformWidth > 250 &&
-        platformWidth < 350
+        platformWidth > 350 &&
+        platformWidth < 450
       ) {
         if (this.sasukePool.getLength()) {
           sasuke = this.sasukePool.getFirst();
@@ -508,7 +508,7 @@ export default class GameScene extends Phaser.Scene {
       }
 
       //if there is a sasukefire over the platform?
-      if (Phaser.Math.Between(1, 100) <= gameOptions.sasukefirePercent && platformWidth >= 350) {
+      if (Phaser.Math.Between(1, 100) <= gameOptions.sasukefirePercent && platformWidth >= 450) {
         if (this.sasukefirePool.getLength()) {
           sasukefire = this.sasukefirePool.getFirst();
           sasukefire.x = posX;
@@ -519,7 +519,7 @@ export default class GameScene extends Phaser.Scene {
           this.sasukefirePool.remove(sasukefire);
         } else {
           sasukefire = this.physics.add.sprite(posX, posY - platform.height / 2, "sasukefire");
-          sasukefire.setScale(1.5);
+          sasukefire.setScale(0.8);
           sasukefire.setDepth(5);
           sasukefire.setFlipX(true);
           sasukefire.setSize(75, 0);
@@ -527,7 +527,7 @@ export default class GameScene extends Phaser.Scene {
           sasukefire.setVelocityX(platform.body.velocity.x);
           sasukefire.setImmovable(true);
           this.sasukefireGroup.add(sasukefire);
-          sasukefire.anims.play("sasukefire");
+          sasukefire.anims.play("sasukefireanim");
         }
       }
     }

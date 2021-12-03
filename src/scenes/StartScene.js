@@ -48,9 +48,9 @@ export default class StartScene extends Phaser.Scene {
       frameWidth: 34,
       frameHeight: 55,
     });
-    this.load.spritesheet("sasukefire", "./assets/obstacles/sasukefirefire.png", {
-      frameWidth: 147.7,
-      frameHeight: 53,
+    this.load.spritesheet("sasukefire", "./assets/obstacles/sasukefire.png", {
+      frameWidth: 268.5,
+      frameHeight: 116,
     });
 
     // * ======= Players ======== * //
@@ -116,7 +116,7 @@ export default class StartScene extends Phaser.Scene {
       .text(
         this.center.x,
         this.title.y + 70,
-        "click to jump, doubleclick to doublejump.  \n \n Collect coins while avoiding obstacles.",
+        "click to jump, doubleclick to doublejump.\n \n Collect coins while avoiding obstacles.",
         {
           fontFamily: "Arcade",
           fontSize: "20px",

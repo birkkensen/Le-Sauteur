@@ -42,12 +42,12 @@ export default class InputPanel extends Phaser.Scene {
 
     this.text = text;
 
-    this.input.keyboard.on("keyup_LEFT", this.moveLeft, this);
-    this.input.keyboard.on("keyup_RIGHT", this.moveRight, this);
-    this.input.keyboard.on("keyup_UP", this.moveUp, this);
-    this.input.keyboard.on("keyup_DOWN", this.moveDown, this);
-    this.input.keyboard.on("keyup_ENTER", this.pressKey, this);
-    this.input.keyboard.on("keyup_SPACE", this.pressKey, this);
+    this.input.keyboard.on("keyup-LEFT", this.moveLeft, this);
+    this.input.keyboard.on("keyup-RIGHT", this.moveRight, this);
+    this.input.keyboard.on("keyup-UP", this.moveUp, this);
+    this.input.keyboard.on("keyup-DOWN", this.moveDown, this);
+    this.input.keyboard.on("keyup-ENTER", this.pressKey, this);
+    this.input.keyboard.on("keyup-SPACE", this.pressKey, this);
     this.input.keyboard.on("keyup", this.anyKey, this);
 
     text.on("pointermove", this.moveBlock, this);
@@ -159,7 +159,7 @@ export default class InputPanel extends Phaser.Scene {
       let newPlayerAndScore = { name: this.name, score: this.score };
       oldPlayers.push(newPlayerAndScore);
       localStorage.setItem("players", JSON.stringify(oldPlayers));
-      this.events.emit("submitName");
+      this.events.emit("submitName", this.name);
     } else if (x === 8 && y === 2 && nameLength > 0) {
       //  Rub
       this.name = this.name.substr(0, nameLength - 1);
