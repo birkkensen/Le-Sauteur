@@ -15,7 +15,9 @@
   },
   "homepage": "https://github.com/ourcade/phaser3-parcel-template",
   "devDependencies": {
-    "@babel/core": "^7.16.0",
+    "@babel/core": "^7.17.2",
+    "@babel/plugin-proposal-class-properties": "^7.16.7",
+    "@babel/preset-react": "^7.16.7",
     "babel-eslint": "^10.1.0",
     "eslint": "^8.3.0",
     "minimist": ">=1.2.2",
