@@ -8,7 +8,7 @@ let overlapTriggered = false;
 window.onload = () => (game = new Phaser.Game(config));
 
 let gameOptions = {
-  platformSpeedRange: 500, //speed range in px/sec
+  platformSpeedRange: 400, //speed range in px/sec
   backgroundSpeed: 80, //backgroundspeed in px/sec
   platformSpawnRange: [80, 300], //how far should the next be platform from the right edge, before next platform spawns, in px
   platformSizeRange: [200, 500], //platform width range in px
@@ -22,7 +22,7 @@ let gameOptions = {
   coinPercent: 50, // % of probability of coin appearing
   ballPercent: 25, // % of probability of spike appearing
   sasukePercent: 15, // % of probability of sasuke appearing
-  sasukefirePercent: 100, // % of probability of sasuke spitting fire appearing
+  sasukefirePercent: 5, // % of probability of sasuke spitting fire appearing
 };
 
 export default class GameScene extends Phaser.Scene {

@@ -21,7 +21,6 @@ export default class Highscore extends Phaser.Scene {
     );
   }
   create() {
-    this.userHasEnteredName = false;
     this.center = {
       x: this.physics.world.bounds.width / 2,
       y: this.physics.world.bounds.height / 2,
@@ -30,12 +29,12 @@ export default class Highscore extends Phaser.Scene {
       .bitmapText(this.center.x, this.center.y - 100, "arcade", "RANK  SCORE   NAME")
       .setTint(0xff00ff)
       .setOrigin();
-    // this.add.bitmapText(100, 310, "arcade", "       " + `${this.finalScore}`).setTint(0xff0000);
 
     this.playerText = this.add
       .bitmapText(this.center.x + 220, this.center.y - 50, "arcade", "")
       .setTint(0xff0000)
       .setOrigin();
+
     this.gameOver = this.add
       .text(this.center.x, this.center.y + 50, "Game over", {
         fontFamily: "Arcade",
@@ -69,10 +68,6 @@ export default class Highscore extends Phaser.Scene {
     panel.events.on("updateName", this.updateName, this);
     panel.events.on("submitName", this.submitName, this);
   }
-  update() {
-    if (this.userHasEnteredName) {
-    }
-  }
   submitName() {
     this.playerText.destroy();
     this.gameOver.destroy();
@@ -83,10 +78,12 @@ export default class Highscore extends Phaser.Scene {
       })
       .setOrigin();
     this.desc.destroy();
+
     let highScoredPlayers = JSON.parse(localStorage.getItem("players"));
     highScoredPlayers.sort((a, b) => {
       return b.score - a.score;
     });
+
     const tintArray = [0xff0000, 0xff8200, 0xffff00, 0x00ff00, 0x00bfff];
     let offsetYPos = 310;
     this.scene.stop("InputPanel");
@@ -110,7 +107,6 @@ export default class Highscore extends Phaser.Scene {
         .setTint(tintArray[i]);
       offsetYName += 50;
     }
-    this.userHasEnteredName = true;
     this.backToMenu = this.add
       .text(this.center.x, this.center.y + 250, "Click anywhere on the screen to go back to main", {
         fontFamily: "Arcade",

@@ -4,7 +4,7 @@
   "description": "A template project for Phaser 3 using Parceljs",
   "scripts": {
     "start": "parcel src/index.html -p 8000",
-    "build": "parcel build src/index.html --out-dir dist",
+    "build": "parcel build src/index.html --out-dir dist --no-minify",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "supertommy",
@@ -26,6 +26,7 @@
     "postcss": "^8.4.4"
   },
   "dependencies": {
+    "parcel-bundler": "^1.12.5",
     "phaser": "^3.55.2"
   },
   "parcelCleanPaths": [
